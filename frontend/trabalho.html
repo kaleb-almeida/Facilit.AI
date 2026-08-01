@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work.AI — facilit.AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="trabalho.css">
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand">
+    <div class="icon-badge"></div>
+    <span class="title">Work.AI</span>
+  </div>
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      <span>Voltar</span>
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="chat-area" id="chatArea">
+    <div class="chat-inner" id="chatInner">
+      <div class="welcome" id="welcomeBlock">
+        <div class="mark"></div>
+        <h1>No que você está trabalhando hoje?</h1>
+        <p>Sou a Work.AI. Te ajudo com e-mails, reuniões, organização da agenda e produtividade no seu dia a dia de trabalho.</p>
+      </div>
+
+      <div class="suggestions" id="chatSuggestions">
+        <button class="suggestion-chip" type="button">Escrever um e-mail</button>
+        <button class="suggestion-chip" type="button">Simular uma entrevista de emprego</button>
+        <button class="suggestion-chip" type="button">Organizar minha semana</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-zone">
+    <form class="input-bar" id="chatForm">
+      <input type="text" id="chatInput" placeholder="Escreva sua mensagem..." autocomplete="off" />
+      <button type="submit" class="send-btn" id="chatSend" aria-label="Enviar mensagem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+  </div>
+  <p class="input-hint">A Work.AI pode cometer erros. Confira informações importantes antes de usar.</p>
+</div>
+
+<script>
+  const chatInner = document.getElementById('chatInner');
+  const chatArea = document.getElementById('chatArea');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+  const welcomeBlock = document.getElementById('welcomeBlock');
+  const chatSuggestions = document.getElementById('chatSuggestions');
+
+  const history = [];
+
+  function addMessage(role, text){
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + (role === 'user' ? 'user' : 'bot');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar ' + (role === 'user' ? 'user' : 'bot');
+    avatar.textContent = role === 'user' ? 'Você' : '';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    return bubble;
+  }
+
+  function addTyping(){
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar bot';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble typing-bubble';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    return row;
+  }
+        async function sendMessage(text) {
+        if (!text.trim()) return;
+
+        if (welcomeBlock) welcomeBlock.remove();
+        if (chatSuggestions) chatSuggestions.remove();
+
+        addMessage("user", text);
+        
+        // Mantém a estrutura de histórico simples para o seu front-end se organizar
+        history.push({ role: "user", content: text });
+        chatInput.value = "";
+        chatSend.disabled = true;
+
+        const typingRow = addTyping();
+
+        try {
+          // CONEXÃO COM O SEU BACKEND: Aponta para a rota específica de educação na porta 3000
+          const response = await fetch("http://localhost:5500/api/ia/trabalho", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mensagem: text // Envia a propriedade 'mensagem' exatamente como o seu server.js espera
+            }),
+          });
+
+          const data = await response.json();
+          typingRow.remove();
+
+          let reply = "Pronta pra te ajudar a aprender!";
+          
+          // Captura a propriedade 'resposta' retornada pelo seu server.js
+          if (data && data.resposta) {
+            reply = data.resposta;
+          } else if (data && data.error) {
+            reply = `Erro no servidor: ${data.error}`;
+          }
+
+          addMessage("bot", reply);
+          history.push({ role: "assistant", content: reply });
+        } catch (err) {
+          typingRow.remove();
+          addMessage(
+            "bot",
+            "Desculpa, tive um problema para responder agora. Pode tentar de novo?",
+          );
+          console.error("Work.AI chat error:", err);
+        } finally {
+          chatSend.disabled = false;
+        }
+      }
+</script>
+</body>
+</html>
