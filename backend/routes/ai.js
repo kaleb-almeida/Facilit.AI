@@ -14,7 +14,7 @@ async function enviarMensagem() {
     divResposta.innerText = "Aguardando resposta da inteligência artificial...";
 
     try {
-        const urlBackend = `http://localhost:3001/api/ia/${selecaoIa}`;
+        const urlBackend = `http://localhost:5500/api/ia/${selecaoIa}`;
         const response = await fetch(urlBackend, {
             method: 'POST',
             headers: {

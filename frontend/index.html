@@ -19,7 +19,7 @@
       <li><a href="#hero">Início</a></li>
       <li><a href="#ias">Soluções</a></li>
       <li><a href="#como">Como funciona</a></li>
-      <li><a href="#cta-final" class="nav-cta">Começar agora</a></li>
+      <li><a href="#loginModal" class="nav-cta" id="openLoginModal">Começar agora</a></li>
     </ul>
   </nav>
 
@@ -44,7 +44,7 @@
     <div class="hero-actions fade-up delay-4">
       <a href="#ias" class="btn-primary">Conhecer as IAs</a>
       <a href="#como" class="btn-secondary">Como funciona</a>
-    </div> 
+    </div>
 
     <div class="stats-strip fade-up delay-5">
       <div class="stat">
@@ -77,7 +77,6 @@
       <div class="card card-trabalho">
         <div class="card-accent"></div>
         <div class="card-icon-wrap card-icon-bg">💼</div>
-        <div class="card-name">IA #01 — Trabalho</div>
         <h3 class="card-title">Work.AI</h3>
         <p class="card-desc">
           A Work.AI te ajuda nas entrevistas, na produtividade e na organização do seu trabalho. Ela entende seu contexto e te dá soluções práticas para o seu problema.
@@ -97,10 +96,9 @@
       <div class="card card-financas">
         <div class="card-accent"></div>
         <div class="card-icon-wrap card-icon-bg">💰</div>
-        <div class="card-name">IA #02 — Finanças</div>
-        <h3 class="card-title">Money.AI</h3>
+        <h3 class="card-title">Finance.AI</h3>
         <p class="card-desc">
-          Dívidas, gastos descontrolados e fim de mês no vermelho. A Money.AI analisa suas finanças, identifica onde seu
+          Dívidas, gastos descontrolados e fim de mês no vermelho. A Finance.AI analisa suas finanças, identifica onde seu
           dinheiro vai e cria um plano real de saída das dívidas. 
         </p>
         <div>
@@ -119,7 +117,6 @@
       <div class="card card-saude">
         <div class="card-accent"></div>
         <div class="card-icon-wrap card-icon-bg">🧠</div>
-        <div class="card-name">IA #03 — Saúde Mental</div>
         <h3 class="card-title">Mental.AI</h3>
         <p class="card-desc">
           Ansiedade, estresse, pensamentos que não param. A Mental.AI é sua parceira emocional: escuta sem julgamento,
@@ -128,7 +125,7 @@
         <div>
           <span class="tag">Ansiedade</span>
           <span class="tag">Bem-estar</span>
-          <span class="tag">Mindfulness</span>
+          <span class="tag">Conselhos</span>
         </div>
         <a href="saude-mental.html" class="card-cta">
           Experimentar
@@ -140,7 +137,6 @@
       <div class="card card-educacao">
         <div class="card-accent"></div>
         <div class="card-icon-wrap card-icon-bg">📚</div>
-        <div class="card-name">IA #04 — Educação</div>
         <h3 class="card-title">Education.AI</h3>
         <p class="card-desc">
           Dificuldade em aprender, conteúdos complexos e falta de tempo para estudar. A Education.AI adapta o aprendizado ao
@@ -198,6 +194,36 @@
       que parecia impossível.</p>
     <a href="#ias" class="btn-primary">Escolher minha IA agora</a>
   </section>
+  <div class="modal-backdrop" id="loginModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <button type="button" class="modal-close" id="closeLoginModal" aria-label="Fechar">×</button>
+      <div class="hero-login-card" aria-label="Cadastro de usuário">
+        <h3 id="loginTitle">Cadastre-se</h3>
+        <p>Cadastre seu nome, sobrenome e e-mail para começar com a sua experiência personalizada.</p>
+        <form id="loginForm" class="hero-login-form">
+          <label class="field">
+            <span>Nome</span>
+            <input type="text" name="nome" placeholder="Seu nome" required>
+          </label>
+          <label class="field">
+            <span>Sobrenome</span>
+            <input type="text" name="sobrenome" placeholder="Seu sobrenome" required>
+          </label>
+          <label class="field full">
+            <span>E-mail</span>
+            <input type="email" name="email" placeholder="seu@email.com" required>
+          </label>
+          <label class="field full">
+            <span>Senha</span>
+            <input type="password" name="senha" placeholder="Crie uma senha" required>
+          </label>
+          <button type="submit" class="login-btn">Criar conta</button>
+        </form>
+        <div id="loginStatus" class="form-status" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
   <footer>
     <div class="logo">facilit<span>.AI</span>
     </div>
@@ -253,6 +279,131 @@
       requestAnimationFrame(animate);
     }
     animate();
+
+    const openLoginModalBtn = document.getElementById('openLoginModal');
+    const loginModal = document.getElementById('loginModal');
+    const closeLoginModalBtn = document.getElementById('closeLoginModal');
+    const loginForm = document.getElementById('loginForm');
+    const loginStatus = document.getElementById('loginStatus');
+    const loginTitle = document.getElementById('loginTitle');
+    const loginSubtitle = document.getElementById('loginSubtitle');
+    const authToggleButtons = document.querySelectorAll('.auth-toggle-btn');
+    const registeredFields = document.querySelectorAll('.register-only');
+    const storedUser = JSON.parse(localStorage.getItem('facilitAiUser') || 'null');
+    let authMode = 'register';
+
+    function openLoginModal() {
+      loginModal.classList.add('active');
+      loginModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLoginModal() {
+      loginModal.classList.remove('active');
+      loginModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      authToggleButtons.forEach((button) => {
+        button.classList.toggle('active', button.dataset.mode === mode);
+      });
+      registeredFields.forEach((field) => field.classList.toggle('is-hidden', mode !== 'register'));
+      loginTitle.textContent = mode === 'register' ? 'Cadastre-se' : 'Entre na sua conta';
+      loginSubtitle.textContent = mode === 'register'
+        ? 'Cadastre seu nome, sobrenome e e-mail para começar com a sua experiência personalizada.'
+        : 'Acesse sua conta para salvar o perfil e recuperar o histórico das conversas.';
+      document.querySelector('.login-btn').textContent = mode === 'register' ? 'Criar conta' : 'Entrar';
+    }
+
+    openLoginModalBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      openLoginModal();
+    });
+
+    closeLoginModalBtn?.addEventListener('click', closeLoginModal);
+
+    loginModal?.addEventListener('click', (event) => {
+      if (event.target === loginModal) {
+        closeLoginModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeLoginModal();
+      }
+    });
+
+    authToggleButtons.forEach((button) => {
+      button.addEventListener('click', () => setAuthMode(button.dataset.mode));
+    });
+
+    if (storedUser) {
+      loginStatus.textContent = `Bem-vindo(a), ${storedUser.nome} ${storedUser.sobrenome}!`;
+      loginStatus.classList.add('success');
+    }
+
+    loginForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(loginForm);
+      const nome = String(formData.get('nome') || '').trim();
+      const sobrenome = String(formData.get('sobrenome') || '').trim();
+      const email = String(formData.get('email') || '').trim();
+      const senha = String(formData.get('senha') || '').trim();
+
+      if (!email || !senha) {
+        loginStatus.textContent = 'Informe e-mail e senha para continuar.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+        return;
+      }
+
+      if (authMode === 'register' && (!nome || !sobrenome)) {
+        loginStatus.textContent = 'Preencha nome, sobrenome, e-mail e senha para criar uma conta.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+        return;
+      }
+
+      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailValido) {
+        loginStatus.textContent = 'Informe um e-mail válido.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+        return;
+      }
+
+      try {
+        loginStatus.textContent = authMode === 'register' ? 'Criando conta...' : 'Entrando...';
+        const response = await fetch(`http://localhost:5500/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(authMode === 'register' ? { nome, sobrenome, email, senha } : { email, senha })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Não foi possível concluir a ação.');
+        }
+
+        localStorage.setItem('facilitAiUser', JSON.stringify(data.user));
+        localStorage.setItem('facilitAiToken', data.token);
+        loginStatus.textContent = authMode === 'register'
+          ? `Conta criada com sucesso! Bem-vindo(a), ${data.user.nome} ${data.user.sobrenome}.`
+          : `Login realizado com sucesso! Bem-vindo(a), ${data.user.nome} ${data.user.sobrenome}.`;
+        loginStatus.classList.remove('error');
+        loginStatus.classList.add('success');
+        loginForm.reset();
+        closeLoginModal();
+      } catch (error) {
+        loginStatus.textContent = error.message || 'Não foi possível concluir a ação.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+      }
+    });
 
     const cards = document.querySelectorAll('.card');
     const obs = new IntersectionObserver(entries => {

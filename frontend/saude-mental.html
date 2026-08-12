@@ -25,23 +25,47 @@
 </div>
 
 <div class="main">
-  <div class="chat-area" id="chatArea">
-    <div class="chat-inner" id="chatInner">
-      <div class="welcome" id="welcomeBlock">
-        <div class="mark"></div>
-        <h1>Como você está se sentindo hoje?</h1>
-        <p>Sou a Mental.AI. Estou aqui para te ouvir sem julgamentos e ajudar com ansiedade, estresse e bem-estar emocional no seu dia a dia.</p>
+  <div class="conversation-area">
+    <div class="chat-panel active" id="chatPanel">
+      <div class="chat-area" id="chatArea">
+        <div class="chat-inner" id="chatInner"> 
+          <div class="welcome" id="welcomeBlock">
+            <div class="mark"></div>
+            <h1>Como você está se sentindo hoje?</h1>
+            <p>Sou a Mental.AI. Estou aqui para te ouvir sem julgamentos e ajudar com ansiedade, estresse e bem-estar emocional no seu dia a dia.</p>
+          </div>
+          <div class="suggestions" id="chatSuggestions">
+            <button class="suggestion-chip" type="button">Preciso desabafar</button>
+            <button class="suggestion-chip" type="button">Estou me sentindo ansioso</button>
+            <button class="suggestion-chip" type="button">Estou com medo</button>
+          </div>
+        </div>
       </div>
+    </div>
 
-  <div class="input-zone">
-    <form class="input-bar" id="chatForm">
-      <input type="text" id="chatInput" placeholder="Conte o que você está sentindo..." autocomplete="off" />
-      <button type="submit" class="send-btn" id="chatSend" aria-label="Enviar mensagem">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-      </button>
-    </form>
+    <div class="history-sidebar" id="historyPanel">
+      <div class="history-header">
+        <div>
+          <p class="section-label">Histórico</p>
+          <h2 class="history-title">Conversas salvas</h2>
+        </div>
+        <button type="button" class="secondary-btn" id="newConversationBtn">Nova conversa</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">Nenhuma conversa salva ainda. Envie uma mensagem para começar.</div>
+      </div>
+    </div>
+
+    <div class="input-zone">
+      <form class="input-bar" id="chatForm">
+        <input type="text" id="chatInput" placeholder="Conte o que você está sentindo..." autocomplete="off" />
+        <button type="submit" class="send-btn" id="chatSend" aria-label="Enviar mensagem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      </form>
+    </div>
+    <p class="input-hint">A Mental.AI pode cometer erros. Em caso de crise, procure ajuda profissional imediata.</p>
   </div>
-  <p class="input-hint">A Mental.AI pode cometer erros. Em caso de crise, procure ajuda profissional imediata.</p>
 </div>
 
 <script>
@@ -52,8 +76,127 @@
   const chatSend = document.getElementById("chatSend");
   const welcomeBlock = document.getElementById("welcomeBlock");
   const chatSuggestions = document.getElementById("chatSuggestions");
+  const historyPanel = document.getElementById("historyPanel");
+  const chatPanel = document.getElementById("chatPanel");
+  const historyList = document.getElementById("historyList");
+  const newConversationBtn = document.getElementById("newConversationBtn");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const historyKey = "mentalAiChatHistory";
+  const authToken = localStorage.getItem("facilitAiToken") || "";
 
-  const history = [];
+  let currentConversation = [];
+  let activeTab = "chat";
+
+  function setActiveTab(tab) {
+    activeTab = tab;
+    tabButtons.forEach((button) => {
+      button.classList.toggle("active", button.dataset.tab === tab);
+    });
+    chatPanel.classList.toggle("active", tab === "chat");
+    historyPanel.classList.toggle("active", tab === "history");
+  }
+
+  function formatDate(iso) {
+    const date = new Date(iso);
+    return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  async function saveConversation() {
+    if (!currentConversation.length || !authToken) return;
+    const firstMessage = currentConversation.find((item) => item.role === "user");
+    const title = firstMessage ? firstMessage.text.slice(0, 60) : "Conversa Mental.AI";
+    const session = {
+      id: Date.now(),
+      title,
+      timestamp: new Date().toISOString(),
+      messages: [...currentConversation],
+    };
+
+    try {
+      await fetch("http://localhost:5500/api/conversations/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ aiName: "saude-mental", title: session.title, messages: session.messages }),
+      });
+    } catch (error) {
+      console.error("Erro ao salvar conversa de saúde mental:", error);
+    }
+
+    await loadHistory();
+  }
+
+  function clearChat() {
+    const rows = chatInner.querySelectorAll(".msg-row");
+    rows.forEach((row) => row.remove());
+    if (welcomeBlock) welcomeBlock.hidden = false;
+    if (chatSuggestions) chatSuggestions.hidden = false;
+    currentConversation = [];
+  }
+
+  async function loadHistory() {
+    historyList.innerHTML = "";
+
+    if (!authToken) {
+      historyList.innerHTML = `<div class="history-empty">Faça login para salvar e recuperar seu histórico.</div>`;
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5500/api/conversations?ai=saude-mental", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha ao carregar histórico");
+      }
+
+      const data = await response.json();
+      const savedSessions = data.conversations || [];
+
+      if (!savedSessions.length) {
+        historyList.innerHTML = `<div class="history-empty">Nenhuma conversa salva ainda. Envie uma mensagem para começar.</div>`;
+        return;
+      }
+
+      savedSessions.forEach((session) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "history-card";
+        const messages = Array.isArray(session.messages) ? session.messages : [];
+        card.innerHTML = `
+          <div class="session-meta">
+            <strong class="session-title">${session.title}</strong>
+            <span class="session-time">${formatDate(session.created_at || session.timestamp)}</span>
+            <span class="session-excerpt">${messages.slice(-2).map((item) => item.text).join(" — ").slice(0, 120)}</span>
+          </div>
+          <span class="session-action">Abrir</span>
+        `;
+        card.addEventListener("click", () => {
+          loadConversation(session);
+          setActiveTab("chat");
+        });
+        historyList.appendChild(card);
+      });
+    } catch (error) {
+      console.error("Erro ao carregar histórico de saúde mental:", error);
+      historyList.innerHTML = `<div class="history-empty">Não foi possível carregar o histórico.</div>`;
+    }
+  }
+
+  function loadConversation(session) {
+    clearChat();
+    const messages = Array.isArray(session.messages) ? session.messages : [];
+    messages.forEach((message) => addMessage(message.role, message.text));
+  }
 
   function addMessage(role, text) {
     const row = document.createElement("div");
@@ -65,14 +208,20 @@
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    
-    // Substitui quebras de linha da IA por <br> para renderizar o texto bonito na tela
-    bubble.innerHTML = text.replace(/\n/g, '<br>');
+    bubble.innerHTML = text.replace(/\n/g, "<br>");
 
     row.appendChild(avatar);
     row.appendChild(bubble);
     chatInner.appendChild(row);
     chatArea.scrollTop = chatArea.scrollHeight;
+
+    if (role === "user" || role === "bot") {
+      currentConversation.push({ role, text });
+    }
+
+    if (welcomeBlock) welcomeBlock.hidden = true;
+    if (chatSuggestions) chatSuggestions.hidden = true;
+
     return bubble;
   }
 
@@ -98,9 +247,6 @@
   async function sendMessage(text) {
     if (!text || !text.trim()) return;
 
-    if (welcomeBlock) welcomeBlock.remove();
-    if (chatSuggestions) chatSuggestions.remove();
-
     addMessage("user", text);
     chatInput.value = "";
     chatSend.disabled = true;
@@ -108,13 +254,12 @@
     const typingRow = addTyping();
 
     try {
-      // Faz a requisição para a rota correta do seu backend local
       const response = await fetch("http://localhost:5500/api/ia/saude-mental", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json" 
+        headers: {
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ mensagem: text }) 
+        body: JSON.stringify({ mensagem: text }),
       });
 
       if (!response.ok) {
@@ -124,7 +269,7 @@
       const data = await response.json();
       typingRow.remove();
 
-      let reply = "Pronta pra te ajudar a aprender!";
+      let reply = "Estou aqui quando você precisar!!";
       if (data && data.resposta) {
         reply = data.resposta;
       } else if (data && data.error) {
@@ -136,9 +281,9 @@
       if (typingRow) typingRow.remove();
       addMessage(
         "bot",
-        "Desculpa, tive um problema para responder agora. Pode tentar de novo?",
+        "Desculpa, tive um problema para responder agora. Pode tentar de novo?"
       );
-      console.error("Education.AI chat error:", err);
+      console.error("Mental.AI chat error:", err);
     } finally {
       chatSend.disabled = false;
       chatInput.focus();
@@ -155,4 +300,22 @@
       sendMessage(chip.textContent.trim());
     });
   });
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setActiveTab(button.dataset.tab);
+    });
+  });
+
+  newConversationBtn.addEventListener("click", () => {
+    if (currentConversation.length) {
+      saveConversation();
+    }
+    clearChat();
+    setActiveTab("chat");
+  });
+
+  loadHistory();
 </script>
+</body>
+</html>

@@ -1,17 +1,25 @@
 {
-  "name": "facilitai-backend",
+  "name": "routes",
   "version": "1.0.0",
-  "type": "module",
-  "main": "server.js",
+  "description": "",
+  "main": "ai.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "NODE_ENV=node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
   "dependencies": {
-    "@google/genai": "^2.13.0",
+    "@google/genai": "^2.15.0",
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
-    "dotenv": "^16.0.0",
-    "express": "^4.18.0",
-    "node-fetch": "^3.3.1"
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.0"
   }
 }
