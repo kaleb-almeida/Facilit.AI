@@ -7,17 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInner = document.getElementById('chatInner');
   const welcomeBlock = document.getElementById('welcomeBlock');
   const suggestions = document.getElementById('chatSuggestions');
-
   const area = document.body.dataset.area;
+  const endpoint = `${API_BASE_URL}/api/${area}`;
+
+  let perguntaOriginal = '';
+  let respostasAnteriores = [];
+  let aguardandoClarificacao = false;
 
   if (!area) {
-    console.error(
-      'Nenhum atributo data-area encontrado na tag <body>. ' +
-        'Adicione, por exemplo: <body data-area="financas">'
-    );
+    console.error('Adicione o atributo data-area na tag <body>.');
+    sendButton.disabled = true;
+    return;
   }
-
-  const endpoint = `${API_BASE_URL}/api/${area}`;
 
   function appendMessage(text, type) {
     const row = document.createElement('div');
@@ -29,11 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-
-    // A resposta do bot já vem em HTML (convertida no backend a partir
-    // do Markdown do Gemini), por isso usamos innerHTML só nesse caso.
-    // A mensagem do usuário usa textContent para não correr risco de
-    // interpretar HTML digitado pela própria pessoa.
     if (type === 'bot') {
       bubble.innerHTML = text;
     } else {
@@ -43,42 +39,96 @@ document.addEventListener('DOMContentLoaded', () => {
     row.appendChild(avatar);
     row.appendChild(bubble);
     chatInner.appendChild(row);
-    chatInner.scrollTop = chatInner.scrollHeight;
+    row.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
   function setLoading(isLoading) {
-    sendButton.disabled = isLoading;
-    input.disabled = isLoading;
-    input.placeholder = isLoading ? 'Enviando...' : 'Escreva sua mensagem...';
+    const bloquearMensagemPrincipal = isLoading || aguardandoClarificacao;
+    sendButton.disabled = bloquearMensagemPrincipal;
+    input.disabled = bloquearMensagemPrincipal;
+    input.placeholder = isLoading
+      ? 'Enviando...'
+      : aguardandoClarificacao
+        ? 'Responda às perguntas acima...'
+        : 'Escreva sua mensagem...';
   }
 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const pergunta = input.value.trim();
-    if (!pergunta) return;
-
-    if (welcomeBlock) {
-      welcomeBlock.remove();
+  function appendClarificationForm(questions) {
+    if (!Array.isArray(questions) || questions.length === 0) {
+      appendMessage('A IA pediu mais contexto, mas nao enviou perguntas.', 'bot');
+      return;
     }
 
-    if (suggestions) {
-      suggestions.remove();
-    }
+    aguardandoClarificacao = true;
 
-    appendMessage(pergunta, 'user');
-    input.value = '';
+    const card = document.createElement('form');
+    card.className = 'clarification-card';
+
+    const title = document.createElement('p');
+    title.className = 'clarification-title';
+    title.textContent = 'Preciso de mais alguns detalhes:';
+    card.appendChild(title);
+
+    questions.forEach((question, index) => {
+      const group = document.createElement('label');
+      group.className = 'clarification-field';
+
+      const questionText = document.createElement('span');
+      questionText.textContent = question;
+
+      const answer = document.createElement('input');
+      answer.type = 'text';
+      answer.name = `answer-${index}`;
+      answer.required = true;
+      answer.autocomplete = 'off';
+      answer.placeholder = 'Digite sua resposta';
+
+      group.appendChild(questionText);
+      group.appendChild(answer);
+      card.appendChild(group);
+    });
+
+    const submit = document.createElement('button');
+    submit.className = 'clarification-submit';
+    submit.type = 'submit';
+    submit.textContent = 'Enviar respostas';
+    card.appendChild(submit);
+
+    card.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const novasRespostas = questions.map((question, index) => ({
+        pergunta: question,
+        resposta: card.elements[`answer-${index}`].value.trim(),
+      }));
+
+      if (novasRespostas.some(({ resposta }) => !resposta)) return;
+
+      respostasAnteriores = respostasAnteriores.concat(novasRespostas);
+      const resumo = novasRespostas
+        .map(({ pergunta, resposta }) => `${pergunta}\n${resposta}`)
+        .join('\n\n');
+
+      card.remove();
+      aguardandoClarificacao = false;
+      appendMessage(resumo, 'user');
+      await enviarParaIa(perguntaOriginal, respostasAnteriores);
+    });
+
+    chatInner.appendChild(card);
+    card.querySelector('input').focus();
+    card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  async function enviarParaIa(pergunta, respostasClarificacao = []) {
     setLoading(true);
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ pergunta }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pergunta, respostasClarificacao }),
       });
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -86,23 +136,42 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      appendMessage(data.resposta || 'Mensagem enviada com sucesso.', 'bot');
+      if (data.needsClarification === true) {
+        appendClarificationForm(data.questions);
+        return;
+      }
+
+      appendMessage(data.resposta || 'A IA nao enviou uma resposta.', 'bot');
+      aguardandoClarificacao = false;
+      perguntaOriginal = '';
+      respostasAnteriores = [];
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
-      appendMessage('Não foi possível enviar a mensagem. Tente novamente.', 'bot');
+      appendMessage('Nao foi possivel enviar a mensagem. Tente novamente.', 'bot');
     } finally {
       setLoading(false);
       input.focus();
     }
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const pergunta = input.value.trim();
+    if (!pergunta) return;
+
+    welcomeBlock?.remove();
+    suggestions?.remove();
+    appendMessage(pergunta, 'user');
+    input.value = '';
+    perguntaOriginal = pergunta;
+    respostasAnteriores = [];
+    await enviarParaIa(perguntaOriginal);
   });
 
-  // Permite clicar num chip de sugestão para preencher e já enviar a pergunta.
-  if (suggestions) {
-    suggestions.querySelectorAll('.suggestion-chip').forEach((chip) => {
-      chip.addEventListener('click', () => {
-        input.value = chip.textContent;
-        form.requestSubmit();
-      });
+  suggestions?.querySelectorAll('.suggestion-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      input.value = chip.textContent;
+      form.requestSubmit();
     });
-  }
+  });
 });
