@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work.AI — facilit.AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="trabalho.css">
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand">
+    <div class="icon-badge"></div>
+    <span class="title">Work.AI</span>
+  </div>
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      <span>Voltar</span>
+    </a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="conversation-area">
+    <div class="chat-area" id="chatArea">
+      <div class="chat-inner" id="chatInner">
+        <div class="welcome" id="welcomeBlock">
+          <div class="mark"></div>
+          <h1>No que você está trabalhando hoje?</h1>
+          <p>Sou a Work.AI. Te ajudo com e-mails, reuniões, organização da agenda e produtividade no seu dia a dia de trabalho.</p>
+        </div>
+
+        <div class="suggestions" id="chatSuggestions">
+          <button class="suggestion-chip" type="button">Escrever um e-mail</button>
+          <button class="suggestion-chip" type="button">Simular uma entrevista de emprego</button>
+          <button class="suggestion-chip" type="button">Organizar minha semana</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-zone">
+      <form class="input-bar" id="chatForm">
+        <input type="text" id="chatInput" placeholder="Escreva sua mensagem..." autocomplete="off" />
+        <button type="submit" class="send-btn" id="chatSend" aria-label="Enviar mensagem">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </button>
+      </form>
+    </div>
+    <p class="input-hint">A Work.AI pode cometer erros. Confira informações importantes antes de usar.</p>
+
+    <aside class="history-sidebar">
+      <div class="history-header">
+        <div>
+          <p class="section-label">Histórico</p>
+          <h2 class="history-title">Minhas conversas</h2>
+        </div>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">Abra uma conversa para salvar o histórico.</div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+  const chatInner = document.getElementById('chatInner');
+  const chatArea = document.getElementById('chatArea');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+  const welcomeBlock = document.getElementById('welcomeBlock');
+  const chatSuggestions = document.getElementById('chatSuggestions');
+  const historyList = document.getElementById('historyList');
+
+  const apiRoute = 'http://localhost:3000/api/ia/trabalho';
+  const storageKey = 'workAiHistory';
+
+  let currentConversation = [];
+  let currentSessionId = null; 
+  let historyData = [];
+
+  function formatDate(iso) {
+    const date = new Date(iso);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  function loadHistory() {
+    historyData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    renderHistory();
+  }
+
+  function saveConversation() {
+    if (!currentConversation.length) return;
+    const firstUser = currentConversation.find((item) => item.role === 'user');
+    if (!firstUser) return;
+
+    if (currentSessionId) {
+      historyData = historyData.filter((s) => s.id !== currentSessionId);
+    } else {
+      currentSessionId = Date.now();
+    }
+
+    const session = {
+      id: currentSessionId,
+      title: firstUser.text.slice(0, 60).trim() || 'Conversa Work.AI',
+      timestamp: new Date().toISOString(),
+      messages: [...currentConversation],
+    };
+
+    historyData.unshift(session);
+    localStorage.setItem(storageKey, JSON.stringify(historyData.slice(0, 20)));
+    renderHistory();
+  }
+
+  function clearChat() {
+    chatInner.querySelectorAll('.msg-row').forEach((row) => row.remove());
+    if (welcomeBlock) welcomeBlock.hidden = false;
+    if (chatSuggestions) chatSuggestions.hidden = false;
+    currentConversation = [];
+    currentSessionId = null;
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+
+    if (!historyData.length) {
+      historyList.innerHTML = '<div class="history-empty">Nenhuma conversa salva ainda. Envie uma mensagem para começar.</div>';
+      return;
+    }
+
+    historyData.forEach((session) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'history-card';
+      const excerpt = session.messages.slice(-2).map((item) => item.text).join(' — ').slice(0, 120);
+      card.innerHTML = `
+        <div class="session-meta">
+          <strong class="session-title">${session.title}</strong>
+          <span class="session-time">${formatDate(session.timestamp)}</span>
+          <span class="session-excerpt">${excerpt}</span>
+        </div>
+        <span class="session-action">Abrir</span>
+      `;
+      card.addEventListener('click', () => {
+        loadConversation(session);
+      });
+      historyList.appendChild(card);
+    });
+  }
+
+  function loadConversation(session) {
+    saveConversation(); 
+    clearChat();
+    session.messages.forEach((message) => addMessage(message.role, message.text, false));
+    currentConversation = session.messages.map((message) => ({ ...message }));
+    currentSessionId = session.id;
+  }
+
+  function addMessage(role, text, record = true) {
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + (role === 'user' ? 'user' : 'bot');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar ' + (role === 'user' ? 'user' : 'bot');
+    avatar.textContent = role === 'user' ? 'Você' : 'AI';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = text.replace(/\n/g, '<br>');
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    if (record) {
+      currentConversation.push({ role, text });
+    }
+
+    if (welcomeBlock) welcomeBlock.hidden = true;
+    if (chatSuggestions) chatSuggestions.hidden = true;
+
+    return bubble;
+  }
+
+  function addTyping() {
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar bot';
+    avatar.textContent = 'AI';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble typing-bubble';
+    bubble.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    chatInner.appendChild(row);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    return row;
+  }
+
+  async function sendMessage(text) {
+    if (!text || !text.trim()) return;
+
+    addMessage('user', text);
+    chatInput.value = '';
+    chatSend.disabled = true;
+    saveConversation();
+
+    const typingRow = addTyping();
+
+    try {
+      const response = await fetch(apiRoute, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensagem: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro na requisição: Status ${response.status}`);
+      }
+
+      const data = await response.json();
+      typingRow.remove();
+
+      let reply = 'Pronta pra te ajudar com sua carreira!';
+      if (data && data.resposta) {
+        reply = data.resposta;
+      } else if (data && data.error) {
+        reply = `Erro no servidor: ${data.error}`;
+      }
+
+      addMessage('bot', reply);
+      saveConversation(); 
+    } catch (err) {
+      if (typingRow) typingRow.remove();
+      addMessage('bot', 'Desculpa, tive um problema para responder agora. Pode tentar de novo?');
+      console.error('Work.AI chat error:', err);
+      saveConversation();
+    } finally {
+      chatSend.disabled = false;
+      chatInput.focus();
+    }
+  }
+
+  chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendMessage(chatInput.value);
+  });
+
+  document.querySelectorAll('.suggestion-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      sendMessage(chip.textContent.trim());
+    });
+  });
+
+  loadHistory();
+</script>
+</body>
+</html>
