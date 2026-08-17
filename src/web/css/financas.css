@@ -144,6 +144,62 @@ body {
   margin: 0;
 }
 
+.clarification-card {
+  align-self: flex-start;
+  width: min(100%, 620px);
+  padding: 1.1rem;
+  border: 1px solid var(--mint);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 6px 20px rgba(30, 43, 36, 0.07);
+}
+
+.clarification-title {
+  margin-bottom: 0.9rem;
+  font-weight: 700;
+  color: var(--mint-deep);
+}
+
+.clarification-field {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.clarification-field input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+
+.clarification-field input:focus {
+  border-color: var(--orange);
+  outline: none;
+}
+
+.clarification-submit {
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--orange);
+  color: var(--white);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.clarification-submit:hover {
+  background: var(--orange-dark);
+}
+
 .history-sidebar {
   grid-area: sidebar;
   width: 100%;
@@ -353,16 +409,19 @@ body {
 .typing-bubble span:nth-child(2) {
   animation-delay: 0.2s;
 }
+
 .typing-bubble span:nth-child(3) {
   animation-delay: 0.4s;
 }
 
 @keyframes blink {
+
   0%,
   80%,
   100% {
     opacity: 0.3;
   }
+
   40% {
     opacity: 1;
   }
@@ -453,13 +512,16 @@ body {
 .send-btn:hover {
   background: var(--orange-dark);
 }
+
 .send-btn:active {
   transform: scale(0.94);
 }
+
 .send-btn:disabled {
   background: var(--line);
   cursor: not-allowed;
 }
+
 .send-btn svg {
   width: 17px;
   height: 17px;
@@ -506,12 +568,15 @@ body {
   .top-bar {
     padding: 0.9rem 1.2rem;
   }
+
   .chat-area {
     padding: 1.4rem 1rem 1rem;
   }
+
   .input-zone {
     padding: 1rem 1rem 1.2rem;
   }
+
   .back-link span {
     display: none;
   }

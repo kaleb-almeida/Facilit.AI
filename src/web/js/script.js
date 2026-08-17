@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInner = document.getElementById('chatInner');
   const welcomeBlock = document.getElementById('welcomeBlock');
   const suggestions = document.getElementById('chatSuggestions');
+  
   const area = document.body.dataset.area;
   const endpoint = `${API_BASE_URL}/api/${area}`;
 
