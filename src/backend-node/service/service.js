@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { config } from 'dotenv';
+import crypto from 'node:crypto';
 import { markdownParaHtml } from '../utils/markdownParaHtml.js';
 
 config();
@@ -72,7 +73,14 @@ function lerRespostaEstruturada(texto) {
   return { needsClarification: false, response: markdownParaHtml(dados.response) };
 }
 
-export async function pedirProGemini(area, pergunta, respostasClarificacao = []) {
+export async function pedirProGemini(
+  area,
+  pergunta,
+  respostasClarificacao = [],
+  usuario_id = '',
+  conversaUuidRecebido = ''
+) {
+
   if (!apiKey) {
     throw new Error('A variável de ambiente GEMINI_API_KEY não foi configurada.');
   }
@@ -86,39 +94,85 @@ export async function pedirProGemini(area, pergunta, respostasClarificacao = [])
   const temperatura = AREAS_TEMPERATURA_BAIXA.has(areaNormalizada) ? 0.3 : 0.7;
   const perguntaComContexto = montarPerguntaComContexto(pergunta, respostasClarificacao);
 
-  const resposta = await ai.models.generateContent({
-    model: 'gemini-3.6-flash',
-    contents: perguntaComContexto,
-    config: {
-      systemInstruction: contextoDaArea,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: 'object',
-        properties: {
-          needsClarification: {
-            type: 'boolean',
-            description: 'True se a pergunta do usuário for muito vaga e precisar de mais contexto, false caso contrário.'
+  let conversa_uuid = conversaUuidRecebido;
+
+  if (!conversa_uuid) {
+    const resposta = await ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: perguntaComContexto,
+      config: {
+        systemInstruction: contextoDaArea,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'object',
+          properties: {
+            needsClarification: {
+              type: 'boolean',
+              description: 'True se a pergunta do usuário for muito vaga e precisar de mais contexto, false caso contrário.'
+            },
+            questions: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Lista de 3 perguntas de múltipla escolha ou contexto para o usuário (preencher apenas se needsClarification for true).'
+            },
+            title: {
+              type: 'string',
+              description: 'Titulo relacionado a pergunta do usuario, fazer pelo menos 4 a 6 palavras, resumindo o assunto da pergunta.'
+            },
+            response: {
+              type: 'string',
+              description: 'A resposta final e completa para o usuário (preencher apenas se needsClarification for false).'
+            }
           },
-          questions: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'Lista de 3 perguntas de múltipla escolha ou contexto para o usuário (preencher apenas se needsClarification for true).'
-          },
-          response: {
-            type: 'string',
-            description: 'A resposta final e completa para o usuário (preencher apenas se needsClarification for false).'
-          }
+          required: ['needsClarification']
         },
-        required: ['needsClarification']
+        temperature: temperatura,
+        maxOutputTokens: 2048,
+        thinkingConfig: {
+          thinkingLevel: 'low',
+        },
       },
-      temperature: temperatura,
-      maxOutputTokens: 2048,
-      thinkingConfig: {
-        thinkingLevel: 'low',
+    });
+
+    conversa_uuid = crypto.randomUUID();
+  } else {
+    const resposta = await ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      contents: perguntaComContexto,
+      config: {
+        systemInstruction: contextoDaArea,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'object',
+          properties: {
+            needsClarification: {
+              type: 'boolean',
+              description: 'True se a pergunta do usuário for muito vaga e precisar de mais contexto, false caso contrário.'
+            },
+            questions: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Lista de 3 perguntas de múltipla escolha ou contexto para o usuário (preencher apenas se needsClarification for true).'
+            },
+            response: {
+              type: 'string',
+              description: 'A resposta final e completa para o usuário (preencher apenas se needsClarification for false).'
+            }
+          },
+          required: ['needsClarification']
+        },
+        temperature: temperatura,
+        maxOutputTokens: 2048,
+        thinkingConfig: {
+          thinkingLevel: 'low',
+        },
       },
-    },
-  });
+    });
+  }
 
   const textoBruto = resposta.text ?? '';
-  return lerRespostaEstruturada(textoBruto);
+  return {
+    ...lerRespostaEstruturada(textoBruto),
+    conversa_uuid,
+  };
 }

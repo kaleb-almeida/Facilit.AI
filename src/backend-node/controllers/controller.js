@@ -12,6 +12,14 @@ export function criarControllerDeArea(area) {
         return;
       }
 
+      if (typeof dados.usuario_id !== 'string' || typeof dados.conversa_uuid !== 'string') {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          error: 'Os campos "usuario_id" e "conversa_uuid" devem ser textos.',
+        }));
+        return;
+      }
+
       const respostasClarificacao = dados.respostasClarificacao ?? [];
 
       if (!Array.isArray(respostasClarificacao)) {
@@ -37,12 +45,15 @@ export function criarControllerDeArea(area) {
       const resultadoIa = await pedirProGemini(
         area,
         dados.pergunta.trim(),
-        respostasClarificacao
+        respostasClarificacao,
+        dados.usuario_id,
+        dados.conversa_uuid
       );
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       if (resultadoIa.needsClarification) {
         res.end(JSON.stringify({
+          conversa_uuid: resultadoIa.conversa_uuid,
           needsClarification: true,
           questions: resultadoIa.questions,
         }));
@@ -50,6 +61,7 @@ export function criarControllerDeArea(area) {
       }
 
       res.end(JSON.stringify({
+        conversa_uuid: resultadoIa.conversa_uuid,
         needsClarification: false,
         resposta: resultadoIa.response,
       }));
@@ -83,8 +95,6 @@ export function criarControllerDeArea(area) {
         return;
       }
 
-      // Erros 5xx do Gemini geralmente sao temporarios. O frontend recebe uma
-      // mensagem amigavel e nunca recebe o erro bruto ou a stack do SDK.
       if (statusExterno >= 500 && statusExterno <= 599) {
         res.writeHead(503, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({

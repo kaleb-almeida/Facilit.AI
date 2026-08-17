@@ -7,13 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInner = document.getElementById('chatInner');
   const welcomeBlock = document.getElementById('welcomeBlock');
   const suggestions = document.getElementById('chatSuggestions');
-  
   const area = document.body.dataset.area;
   const endpoint = `${API_BASE_URL}/api/${area}`;
 
   let perguntaOriginal = '';
   let respostasAnteriores = [];
   let aguardandoClarificacao = false;
+  const usuario_id = '';
+  let conversa_uuid = '';
 
   if (!area) {
     console.error('Adicione o atributo data-area na tag <body>.');
@@ -128,7 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pergunta, respostasClarificacao }),
+        body: JSON.stringify({
+          usuario_id,
+          conversa_uuid,
+          pergunta,
+          respostasClarificacao,
+        }),
       });
       const data = await response.json();
 
@@ -136,6 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
         appendMessage(data.error || 'Ocorreu um erro ao processar sua pergunta.', 'bot');
         return;
       }
+
+      conversa_uuid = data.conversa_uuid ?? conversa_uuid;
 
       if (data.needsClarification === true) {
         appendClarificationForm(data.questions);
