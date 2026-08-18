@@ -1,21 +1,23 @@
 {
   "name": "facilitai",
   "version": "1.0.0",
-  "description": "",
+  "description": "Facilit.AI - Plataforma Educacional, Financeira, Saúde Mental e Trabalho com IA",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-node": "cd backend && node server.js",
+    "start-java": "cd backend-java && compile_and_run.bat",
+    "dev": "concurrently \"npm run start-node\" \"npm run start-java\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "bcryptjs": "^3.0.3",
+    "@google/genai": "^2.15.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

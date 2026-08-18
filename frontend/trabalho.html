@@ -57,7 +57,6 @@
           <p class="section-label">Histórico</p>
           <h2 class="history-title">Minhas conversas</h2>
         </div>
-        <button type="button" class="secondary-btn" id="newConversationBtn">Nova conversa</button>
       </div>
       <div class="history-list" id="historyList">
         <div class="history-empty">Abra uma conversa para salvar o histórico.</div>
@@ -74,12 +73,12 @@
   const welcomeBlock = document.getElementById('welcomeBlock');
   const chatSuggestions = document.getElementById('chatSuggestions');
   const historyList = document.getElementById('historyList');
-  const newConversationBtn = document.getElementById('newConversationBtn');
 
-  const apiRoute = 'http://localhost:5500/api/ia/trabalho';
+  const apiRoute = 'http://localhost:3000/api/ia/trabalho';
   const storageKey = 'workAiHistory';
 
   let currentConversation = [];
+  let currentSessionId = null; 
   let historyData = [];
 
   function formatDate(iso) {
@@ -103,8 +102,14 @@
     const firstUser = currentConversation.find((item) => item.role === 'user');
     if (!firstUser) return;
 
+    if (currentSessionId) {
+      historyData = historyData.filter((s) => s.id !== currentSessionId);
+    } else {
+      currentSessionId = Date.now();
+    }
+
     const session = {
-      id: Date.now(),
+      id: currentSessionId,
       title: firstUser.text.slice(0, 60).trim() || 'Conversa Work.AI',
       timestamp: new Date().toISOString(),
       messages: [...currentConversation],
@@ -120,6 +125,7 @@
     if (welcomeBlock) welcomeBlock.hidden = false;
     if (chatSuggestions) chatSuggestions.hidden = false;
     currentConversation = [];
+    currentSessionId = null;
   }
 
   function renderHistory() {
@@ -151,9 +157,11 @@
   }
 
   function loadConversation(session) {
+    saveConversation(); 
     clearChat();
     session.messages.forEach((message) => addMessage(message.role, message.text, false));
     currentConversation = session.messages.map((message) => ({ ...message }));
+    currentSessionId = session.id;
   }
 
   function addMessage(role, text, record = true) {
@@ -208,6 +216,7 @@
     addMessage('user', text);
     chatInput.value = '';
     chatSend.disabled = true;
+    saveConversation();
 
     const typingRow = addTyping();
 
@@ -233,10 +242,12 @@
       }
 
       addMessage('bot', reply);
+      saveConversation(); 
     } catch (err) {
       if (typingRow) typingRow.remove();
       addMessage('bot', 'Desculpa, tive um problema para responder agora. Pode tentar de novo?');
       console.error('Work.AI chat error:', err);
+      saveConversation();
     } finally {
       chatSend.disabled = false;
       chatInput.focus();
@@ -252,11 +263,6 @@
     chip.addEventListener('click', () => {
       sendMessage(chip.textContent.trim());
     });
-  });
-
-  newConversationBtn.addEventListener('click', () => {
-    saveConversation();
-    clearChat();
   });
 
   loadHistory();

@@ -29,8 +29,6 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
 
-    <span class="hero-badge fade-up delay-1">✦ Inteligência artificial para a vida real</span>
-
     <h1 class="hero-title fade-up delay-2">
       <span class="brand">facilit.AI</span>
       Resolvendo a sua vida
@@ -378,7 +376,7 @@
 
       try {
         loginStatus.textContent = authMode === 'register' ? 'Criando conta...' : 'Entrando...';
-        const response = await fetch(`http://localhost:5500/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
+        const response = await fetch(`http://localhost:8081/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(authMode === 'register' ? { nome, sobrenome, email, senha } : { email, senha })

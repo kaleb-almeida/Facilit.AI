@@ -101,247 +101,247 @@
               <p class="section-label">Histórico</p>
               <h2 class="history-title">Minhas conversas</h2>
             </div>
-            <button type="button" class="secondary-btn" id="newConversationBtn">Nova conversa</button>
           </div>
           <div class="history-list" id="historyList">
             <div class="history-empty">Abra uma conversa para salvar o histórico.</div>
           </div>
         </aside>
       </div>
-<script>
-  const chatInner = document.getElementById("chatInner");
-  const chatArea = document.getElementById("chatArea");
-  const chatForm = document.getElementById("chatForm");
-  const chatInput = document.getElementById("chatInput");
-  const chatSend = document.getElementById("chatSend");
-  const welcomeBlock = document.getElementById("welcomeBlock");
-  const chatSuggestions = document.getElementById("chatSuggestions");
-  const historyList = document.getElementById("historyList");
-  const newConversationBtn = document.getElementById("newConversationBtn");
+    </div>
 
-  const apiRoute = "http://localhost:5500/api/ia/financas";
-  const storageKey = "financasAiHistory";
-  const authToken = localStorage.getItem("facilitAiToken") || "";
+    <script>
+      const chatInner = document.getElementById("chatInner");
+      const chatArea = document.getElementById("chatArea");
+      const chatForm = document.getElementById("chatForm");
+      const chatInput = document.getElementById("chatInput");
+      const chatSend = document.getElementById("chatSend");
+      const welcomeBlock = document.getElementById("welcomeBlock");
+      const chatSuggestions = document.getElementById("chatSuggestions");
+      const historyList = document.getElementById("historyList");
 
-  let currentConversation = [];
-  let historyData = [];
+      const apiRoute = "/api/ia/financas";
+      const aiName = "financas";
+      const authToken = localStorage.getItem("facilitAiToken") || "";
 
-  function formatDate(iso) {
-    const date = new Date(iso);
-    return date.toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+      let currentConversation = [];
+      let historyData = [];
 
-  async function loadHistory() {
-    if (!authToken) {
-      historyData = [];
-      renderHistory();
-      return;
-    }
-
-    try {
-      const response = await fetch("http://localhost:5500/api/conversations?ai=financas", {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        historyData = data.conversations || [];
-      } else {
-        historyData = [];
-      }
-    } catch (error) {
-      console.error("Erro ao carregar histórico de finanças:", error);
-      historyData = [];
-    }
-
-    renderHistory();
-  }
-
-  async function saveConversation() {
-    if (!currentConversation.length || !authToken) return;
-    const firstUser = currentConversation.find((item) => item.role === "user");
-    if (!firstUser) return;
-
-    const session = {
-      id: Date.now(),
-      title: firstUser.text.slice(0, 60).trim() || "Conversa Finance.AI",
-      timestamp: new Date().toISOString(),
-      messages: [...currentConversation],
-    };
-
-    try {
-      await fetch("http://localhost:5500/api/conversations/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          aiName: "financas",
-          title: session.title,
-          messages: session.messages,
-        }),
-      });
-    } catch (error) {
-      console.error("Erro ao salvar conversa de finanças:", error);
-    }
-
-    await loadHistory();
-  }
-
-  function clearChat() {
-    chatInner.querySelectorAll(".msg-row").forEach((row) => row.remove());
-    if (welcomeBlock) welcomeBlock.hidden = false;
-    if (chatSuggestions) chatSuggestions.hidden = false;
-    currentConversation = [];
-  }
-
-  function renderHistory() {
-    historyList.innerHTML = "";
-
-    if (!historyData.length) {
-      historyList.innerHTML = '<div class="history-empty">Nenhuma conversa salva ainda. Envie uma mensagem para começar.</div>';
-      return;
-    }
-
-    historyData.forEach((session) => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "history-card";
-      const messages = Array.isArray(session.messages) ? session.messages : [];
-      const excerpt = messages.slice(-2).map((item) => item.text).join(" — ").slice(0, 120);
-      card.innerHTML = `
-        <div class="session-meta">
-          <strong class="session-title">${session.title}</strong>
-          <span class="session-time">${formatDate(session.created_at || session.timestamp)}</span>
-          <span class="session-excerpt">${excerpt}</span>
-        </div>
-        <span class="session-action">Abrir</span>
-      `;
-      card.addEventListener("click", () => {
-        loadConversation(session);
-      });
-      historyList.appendChild(card);
-    });
-  }
-
-  function loadConversation(session) {
-    clearChat();
-    const messages = Array.isArray(session.messages) ? session.messages : [];
-    messages.forEach((message) => addMessage(message.role, message.text, false));
-    currentConversation = messages.map((message) => ({ ...message }));
-  }
-
-  function addMessage(role, text, record = true) {
-    const row = document.createElement("div");
-    row.className = "msg-row " + (role === "user" ? "user" : "bot");
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar " + (role === "user" ? "user" : "bot");
-    avatar.textContent = role === "user" ? "Você" : "AI";
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.innerHTML = text.replace(/\n/g, "<br>");
-
-    row.appendChild(avatar);
-    row.appendChild(bubble);
-    chatInner.appendChild(row);
-    chatArea.scrollTop = chatArea.scrollHeight;
-
-    if (record) {
-      currentConversation.push({ role, text });
-    }
-
-    if (welcomeBlock) welcomeBlock.hidden = true;
-    if (chatSuggestions) chatSuggestions.hidden = true;
-
-    return bubble;
-  }
-
-  function addTyping() {
-    const row = document.createElement("div");
-    row.className = "msg-row bot";
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar bot";
-    avatar.textContent = "AI";
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble typing-bubble";
-    bubble.innerHTML = "<span>.</span><span>.</span><span>.</span>";
-
-    row.appendChild(avatar);
-    row.appendChild(bubble);
-    chatInner.appendChild(row);
-    chatArea.scrollTop = chatArea.scrollHeight;
-    return row;
-  }
-
-  async function sendMessage(text) {
-    if (!text || !text.trim()) return;
-
-    addMessage("user", text);
-    chatInput.value = "";
-    chatSend.disabled = true;
-
-    const typingRow = addTyping();
-
-    try {
-      const response = await fetch(apiRoute, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensagem: text }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erro na requisição: Status ${response.status}`);
+      function formatDate(iso) {
+        const date = new Date(iso);
+        return date.toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
       }
 
-      const data = await response.json();
-      typingRow.remove();
+      async function loadHistory() {
+        if (!authToken) {
+          historyData = [];
+          renderHistory();
+          return;
+        }
 
-      let reply = "Desculpe, não consegui processar a resposta.";
-      if (data && data.resposta) {
-        reply = data.resposta;
-      } else if (data && data.error) {
-        reply = `Erro no servidor: ${data.error}`;
+        try {
+          const response = await fetch(`/api/conversations?ai=${aiName}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            historyData = data.conversations || [];
+          } else {
+            historyData = [];
+          }
+        } catch (error) {
+          console.error("Erro ao carregar histórico:", error);
+          historyData = [];
+        }
+
+        renderHistory();
       }
 
-      addMessage("bot", reply);
-    } catch (err) {
-      if (typingRow) typingRow.remove();
-      addMessage("bot", "Desculpa, tive um problema para responder agora. Pode tentar de novo?");
-      console.error("Finance.AI chat error:", err);
-    } finally {
-      chatSend.disabled = false;
-      chatInput.focus();
-    }
-  }
+      async function saveConversation() {
+        if (!currentConversation.length || !authToken) return;
+        const firstUser = currentConversation.find((item) => item.role === "user");
+        if (!firstUser) return;
 
-  chatForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    sendMessage(chatInput.value);
-  });
+        const session = {
+          title: firstUser.text.slice(0, 60).trim() || "Conversa Finance.AI",
+          messages: [...currentConversation],
+        };
 
-  document.querySelectorAll(".suggestion-chip").forEach((chip) => {
-    chip.addEventListener("click", () => {
-      sendMessage(chip.textContent.trim());
-    });
-  });
+        try {
+          await fetch("/api/conversations/save", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`,
+            },
+            body: JSON.stringify({
+              aiName: aiName,
+              title: session.title,
+              messages: session.messages,
+            }),
+          });
+        } catch (error) {
+          console.error("Erro ao salvar conversa:", error);
+        }
 
-  newConversationBtn.addEventListener("click", () => {
-    saveConversation();
-    clearChat();
-  });
+        await loadHistory();
+      }
 
-  loadHistory();
-</script>
-</body>
+      function clearChat() {
+        chatInner.querySelectorAll(".msg-row").forEach((row) => row.remove());
+        if (welcomeBlock) welcomeBlock.hidden = false;
+        if (chatSuggestions) chatSuggestions.hidden = false;
+        currentConversation = [];
+      }
+
+      function renderHistory() {
+        historyList.innerHTML = "";
+
+        if (!historyData.length) {
+          historyList.innerHTML = '<div class="history-empty">Nenhuma conversa salva ainda. Envie uma mensagem para começar.</div>';
+          return;
+        }
+
+        historyData.forEach((session) => {
+          const card = document.createElement("button");
+          card.type = "button";
+          card.className = "history-card";
+          const messages = Array.isArray(session.messages) ? session.messages : [];
+          const excerpt = messages.slice(-2).map((item) => item.text).join(" — ").slice(0, 120);
+
+          card.innerHTML = `
+            <div class="session-meta">
+              <strong class="session-title"></strong>
+              <span class="session-time">${formatDate(session.created_at || session.timestamp)}</span>
+              <span class="session-excerpt"></span>
+            </div>
+            <span class="session-action">Abrir</span>
+          `;
+
+          card.querySelector(".session-title").textContent = session.title;
+          card.querySelector(".session-excerpt").textContent = excerpt;
+
+          card.addEventListener("click", () => {
+            loadConversation(session);
+          });
+          historyList.appendChild(card);
+        });
+      }
+
+      function loadConversation(session) {
+        clearChat();
+        const messages = Array.isArray(session.messages) ? session.messages : [];
+        messages.forEach((message) => addMessage(message.role, message.text, false));
+        currentConversation = messages.map((message) => ({ ...message }));
+      }
+
+      function addMessage(role, text, record = true) {
+        const row = document.createElement("div");
+        row.className = "msg-row " + (role === "user" ? "user" : "bot");
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar " + (role === "user" ? "user" : "bot");
+        avatar.textContent = role === "user" ? "Você" : "AI";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = text;
+        bubble.style.whiteSpace = "pre-wrap";
+
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+        chatInner.appendChild(row);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        if (record) {
+          currentConversation.push({ role, text });
+        }
+
+        if (welcomeBlock) welcomeBlock.hidden = true;
+        if (chatSuggestions) chatSuggestions.hidden = true;
+
+        return bubble;
+      }
+
+      function addTyping() {
+        const row = document.createElement("div");
+        row.className = "msg-row bot";
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar bot";
+        avatar.textContent = "AI";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble typing-bubble";
+        bubble.innerHTML = "<span>.</span><span>.</span><span>.</span>";
+
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+        chatInner.appendChild(row);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        return row;
+      }
+
+      async function sendMessage(text) {
+        if (!text || !text.trim()) return;
+
+        addMessage("user", text);
+        chatInput.value = "";
+        chatSend.disabled = true;
+
+        const typingRow = addTyping();
+
+        try {
+          const response = await fetch(apiRoute, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mensagem: text }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erro na requisição: Status ${response.status}`);
+          }
+
+          const data = await response.json();
+          typingRow.remove();
+
+          let reply = "Desculpe, não consegui processar a resposta.";
+          if (data && data.resposta) {
+            reply = data.resposta;
+          } else if (data && data.error) {
+            reply = `Erro no servidor: ${data.error}`;
+          }
+
+          addMessage("bot", reply);
+          await saveConversation();
+        } catch (err) {
+          if (typingRow) typingRow.remove();
+          addMessage("bot", "Desculpa, tive um problema para responder agora. Pode tentar de novo?");
+          console.error("Chat error:", err);
+        } finally {
+          chatSend.disabled = false;
+          chatInput.focus();
+        }
+      }
+
+      chatForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        sendMessage(chatInput.value);
+      });
+
+      document.querySelectorAll(".suggestion-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          sendMessage(chip.textContent.trim());
+        });
+      });
+
+      loadHistory();
+    </script>
+  </body>
 </html>
