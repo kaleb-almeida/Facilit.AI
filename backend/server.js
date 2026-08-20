@@ -1,13 +1,11 @@
-import 'dotenv/config';
-import dotenv from 'dotenv';
+import './env-loader.js';
 import cors from 'cors';
 import express from 'express';
 
 import iaRoutes from './routes/ia.js';
 
-dotenv.config();
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT_NODE || 3000;
 
 app.use(cors());
 app.use(express.json());

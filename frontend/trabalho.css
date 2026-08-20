@@ -8,17 +8,17 @@
 }
 
 :root {
-  --bg: #f5f9f6;
-  --bg-alt: #eef7f1;
+  --bg: #fafbfa;
+  --bg-alt: #f3f8f5;
   --mint: #bfe8d4;
-  --mint-soft: #dcf3e7;
-  --mint-deep: #3e8768;
-  --orange: #ff7a3d;
-  --orange-dark: #e8622a;
-  --orange-soft: #ffe9dd;
-  --ink: #000000;
-  --ink-soft: #36483e;
-  --line: #d8e9df;
+  --mint-soft: #e6f5ef;
+  --mint-deep: #188260;
+  --orange: #fa6523;
+  --orange-dark: #d6501a;
+  --orange-soft: #ffeee5;
+  --ink: #1a1a1a;
+  --ink-soft: #5c6f65;
+  --line: #e3ede7;
   --white: #ffffff;
 }
 
@@ -516,3 +516,239 @@ body {
     display: none;
   }
 }
+
+/* ─── MODAL ELEGANTE DE SESSÃO EXPIRADA ─── */
+.session-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.5rem;
+  animation: fadeInModal 0.25s ease;
+}
+
+.session-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 420px;
+  width: 100%;
+  padding: 2.2rem 2rem;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(24, 130, 96, 0.15);
+  animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.session-modal-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--orange-soft);
+  color: var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+}
+
+.session-modal-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.session-modal-card h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.6rem;
+}
+
+.session-modal-card p {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 1.6rem;
+}
+
+.session-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-modal-primary {
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.btn-modal-primary:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-modal-secondary {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.75rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-modal-secondary:hover {
+  background: var(--mint-soft);
+  color: var(--mint-deep);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── BOTÃO MINIMALISTA NOVA CONVERSA (VERDE PASTEL) ─── */
+.btn-new-chat-minimal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e6f5ef;
+  color: #188260;
+  border: 1px solid #bfe8d4;
+  border-radius: 50px;
+  padding: 0.38rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.btn-new-chat-minimal:hover {
+  background: #d1fae5;
+  border-color: #188260;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(24, 130, 96, 0.12);
+}
+
+.btn-new-chat-minimal svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ─── TRÊS PONTINHOS E MENU DE EXCLUSÃO NO HISTÓRICO ─── */
+.history-card {
+  position: relative;
+}
+
+.history-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.history-actions-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.history-options-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink-soft);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-card:hover .history-options-btn,
+.history-options-btn:focus,
+.history-options-btn.active {
+  opacity: 1;
+}
+
+.history-options-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ink);
+}
+
+.history-options-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.history-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  min-width: 160px;
+  padding: 4px;
+  animation: fadeInDropdown 0.15s ease;
+}
+
+.history-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #d9534f;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.history-dropdown-item:hover {
+  background: #fdf2f2;
+  color: #c9302c;
+}
+
+.history-dropdown-item svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+@keyframes fadeInDropdown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+

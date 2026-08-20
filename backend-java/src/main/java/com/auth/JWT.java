@@ -1,3 +1,5 @@
+package com.auth;
+
 import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

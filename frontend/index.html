@@ -19,7 +19,9 @@
       <li><a href="#hero">Início</a></li>
       <li><a href="#ias">Soluções</a></li>
       <li><a href="#como">Como funciona</a></li>
-      <li><a href="#loginModal" class="nav-cta" id="openLoginModal">Começar agora</a></li>
+      <li><a href="#loginModal" class="nav-link" id="openLoginModalBtn" style="font-weight: 600; color: var(--texto);">Entrar</a></li>
+      <li id="navProfileItem" style="display: none;"><a href="perfil.html" class="nav-link" style="font-weight: 600; color: var(--texto);">Meu Perfil</a></li>
+      <li><a href="#loginModal" class="nav-cta" id="openRegisterModalBtn">Começar agora</a></li>
     </ul>
   </nav>
 
@@ -192,20 +194,22 @@
       que parecia impossível.</p>
     <a href="#ias" class="btn-primary">Escolher minha IA agora</a>
   </section>
+
+
   <div class="modal-backdrop" id="loginModal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
       <button type="button" class="modal-close" id="closeLoginModal" aria-label="Fechar">×</button>
       <div class="hero-login-card" aria-label="Cadastro de usuário">
         <h3 id="loginTitle">Cadastre-se</h3>
-        <p>Cadastre seu nome, sobrenome e e-mail para começar com a sua experiência personalizada.</p>
+        <p id="loginSubtitle">Cadastre seu nome, sobrenome e e-mail para começar com a sua experiência personalizada.</p>
         <form id="loginForm" class="hero-login-form">
-          <label class="field">
+          <label class="field register-only">
             <span>Nome</span>
-            <input type="text" name="nome" placeholder="Seu nome" required>
+            <input type="text" name="nome" placeholder="Seu nome" id="inputNome">
           </label>
-          <label class="field">
+          <label class="field register-only">
             <span>Sobrenome</span>
-            <input type="text" name="sobrenome" placeholder="Seu sobrenome" required>
+            <input type="text" name="sobrenome" placeholder="Seu sobrenome" id="inputSobrenome">
           </label>
           <label class="field full">
             <span>E-mail</span>
@@ -278,7 +282,6 @@
     }
     animate();
 
-    const openLoginModalBtn = document.getElementById('openLoginModal');
     const loginModal = document.getElementById('loginModal');
     const closeLoginModalBtn = document.getElementById('closeLoginModal');
     const loginForm = document.getElementById('loginForm');
@@ -315,8 +318,30 @@
       document.querySelector('.login-btn').textContent = mode === 'register' ? 'Criar conta' : 'Entrar';
     }
 
+    const openLoginModalBtn = document.getElementById('openLoginModalBtn');
+    const navProfileItem = document.getElementById('navProfileItem');
+    const openRegisterModalBtn = document.getElementById('openRegisterModalBtn');
+
+    function updateNav() {
+      if (storedUser) {
+        if (openLoginModalBtn) openLoginModalBtn.parentElement.style.display = 'none';
+        if (navProfileItem) navProfileItem.style.display = 'inline-block';
+      } else {
+        if (openLoginModalBtn) openLoginModalBtn.parentElement.style.display = 'inline-block';
+        if (navProfileItem) navProfileItem.style.display = 'none';
+      }
+    }
+    updateNav();
+
     openLoginModalBtn?.addEventListener('click', (event) => {
       event.preventDefault();
+      setAuthMode('login');
+      openLoginModal();
+    });
+
+    openRegisterModalBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      setAuthMode('register');
       openLoginModal();
     });
 

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Perfil - facilit.AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #fafbfa;
+      --card-bg: #ffffff;
+      --text-main: #1a1a1a;
+      --text-muted: #5c6f65;
+      --menta: #188260;
+      --menta-hover: #106345;
+      --menta-soft: #e6f5ef;
+      --menta-border: #bfe8d4;
+      --laranja: #fa6523;
+      --laranja-hover: #d6501a;
+      --laranja-soft: #ffeee5;
+      --coral-delete: #e29596;
+      --coral-hover: #d2797b;
+      --grad-avatar: linear-gradient(135deg, #fa6523 0%, #188260 100%);
+      --borda: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ─── BOTÃO VOLTAR ─── */
+    .back-btn {
+      position: absolute;
+      top: 40px;
+      left: 50px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .back-btn:hover {
+      color: var(--menta);
+      transform: translateX(-3px);
+    }
+
+    .back-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    /* ─── ÁREA DE CONTEÚDO PRINCIPAL ─── */
+    .profile-card {
+      background: var(--card-bg);
+      width: 850px;
+      max-width: 90%;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(24, 130, 96, 0.08);
+      border: 1px solid var(--borda);
+      display: flex;
+      padding: 60px 45px;
+      gap: 45px;
+      align-items: center;
+    }
+
+    /* Coluna Esquerda: Avatar (40%) */
+    .col-left {
+      flex: 0 0 40%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .avatar-wrapper {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: var(--grad-avatar);
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(250, 101, 35, 0.2);
+    }
+
+    .avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: var(--menta);
+      border: 4px solid var(--card-bg);
+    }
+
+    /* Coluna Direita: Informações e Ações (60%) */
+    .col-right {
+      flex: 0 0 60%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .data-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .data-label {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-value {
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--text-main);
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 50px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: fit-content;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .btn-logout {
+      background: linear-gradient(135deg, var(--laranja), var(--laranja-hover));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(250, 101, 35, 0.25);
+    }
+    
+    .btn-logout:hover {
+      opacity: 0.94;
+    }
+
+    .btn-delete {
+      background-color: transparent;
+      color: var(--coral-delete);
+      border: 1.5px solid #f2e3e3;
+    }
+
+    .btn-delete:hover {
+      background-color: #fcf1f1;
+      border-color: var(--coral-delete);
+    }
+
+    #profileStatus {
+      margin-top: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* ─── TOAST / BANNER ELEGANTE NO INFERIOR (VERDE PASTEL) ─── */
+    .bottom-floating-banner {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffffff;
+      border: 2px solid var(--menta-border);
+      border-radius: 24px;
+      padding: 1.2rem 1.8rem;
+      box-shadow: 0 20px 45px rgba(24, 130, 96, 0.16);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      z-index: 10000;
+      max-width: 92%;
+      width: 600px;
+      animation: slideUpToast 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .banner-icon-mint {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--menta-soft);
+      color: var(--menta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .banner-icon-mint svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .banner-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .banner-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .banner-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .banner-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-banner-delete {
+      background: #e29596;
+      color: #ffffff;
+      border: none;
+      padding: 0.65rem 1.2rem;
+      border-radius: 50px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-banner-delete:hover {
+      background: var(--coral-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-banner-cancel {
+      background: var(--menta-soft);
+      color: var(--menta);
+      border: none;
+      padding: 0.65rem 1.1rem;
+      border-radius: 50px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-banner-cancel:hover {
+      background: var(--menta-border);
+    }
+
+    /* Banner de Sucesso */
+    .banner-success {
+      border-color: var(--menta);
+      width: auto;
+      min-width: 360px;
+      justify-content: center;
+    }
+
+    /* ─── MODAL ELEGANTE DE SESSÃO EXPIRADA ─── */
+    .session-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1.5rem;
+      animation: fadeInModal 0.25s ease;
+    }
+
+    .session-modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      padding: 2.2rem 2rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(24, 130, 96, 0.15);
+      animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .session-modal-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--laranja-soft);
+      color: var(--laranja);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+    }
+
+    .session-modal-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .session-modal-card h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.6rem;
+    }
+
+    .session-modal-card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.6rem;
+    }
+
+    .session-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .btn-modal-primary {
+      background: linear-gradient(135deg, var(--laranja), var(--laranja-hover));
+      color: #ffffff;
+      border: none;
+      padding: 0.85rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .btn-modal-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    @keyframes slideUpToast {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+      }
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUpModal {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @media (max-width: 768px) {
+      .back-btn {
+        top: 20px;
+        left: 20px;
+      }
+      .profile-card {
+        flex-direction: column;
+        padding: 40px 20px;
+        text-align: center;
+        margin-top: 80px;
+      }
+      .col-left, .col-right {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+      }
+      .bottom-floating-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.2rem;
+        bottom: 15px;
+      }
+      .banner-actions {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botão Voltar Simples -->
+  <a href="index.html" class="back-btn">
+    <svg viewBox="0 0 24 24">
+      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+    </svg>
+    Voltar
+  </a>
+
+  <!-- Main Content -->
+  <div class="profile-card">
+    <div class="col-left">
+      <div class="avatar-wrapper">
+        <div class="avatar-inner" id="profileInitials">?</div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="data-group">
+        <span class="data-label">Nome Completo</span>
+        <span class="data-value" id="profileName">Carregando...</span>
+      </div>
+      <div class="data-group">
+        <span class="data-label">Endereço de E-mail</span>
+        <span class="data-value" id="profileEmail">aguarde...</span>
+      </div>
+
+      <div class="actions">
+        <!-- Botão Logout -->
+        <button id="logoutBtn" class="btn btn-logout">
+          <span>Sair da Conta</span>
+          <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        </button>
+
+        <!-- Botão Excluir -->
+        <button id="deleteAccountBtn" class="btn btn-delete">
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          <span>Excluir Conta Permanentemente</span>
+        </button>
+      </div>
+      <div id="profileStatus"></div>
+    </div>
+  </div>
+
+  <!-- 1. Ícone Verde Pastel: "Tem certeza que deseja excluir sua conta?" (Inferior do site) -->
+  <div id="confirmDeleteBanner" class="bottom-floating-banner" style="display: none;">
+    <div class="banner-icon-mint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </div>
+    <div class="banner-text">
+      <span class="banner-title">Tem certeza que deseja excluir sua conta?</span>
+      <span class="banner-subtitle">Esta ação apagará permanentemente seu cadastro e histórico.</span>
+    </div>
+    <div class="banner-actions">
+      <button type="button" class="btn-banner-delete" id="confirmDeleteActionBtn">Sim, Excluir</button>
+      <button type="button" class="btn-banner-cancel" id="cancelDeleteActionBtn">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- 2. Ícone Verde Pastel: "Conta excluída com sucesso" (Inferior do site) -->
+  <div id="successDeleteBanner" class="bottom-floating-banner banner-success" style="display: none;">
+    <div class="banner-icon-mint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <div class="banner-text">
+      <span class="banner-title">Conta excluída com sucesso!</span>
+      <span class="banner-subtitle">Sentiremos sua falta. Redirecionando...</span>
+    </div>
+  </div>
+
+  <!-- Modal Elegante de Sessão Expirada -->
+  <div id="sessionExpireModal" class="session-modal-backdrop" style="display: none;">
+    <div class="session-modal-card">
+      <div class="session-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h3>Sessão Expirada</h3>
+      <p>Seu token de acesso expirou ou não é mais válido. Faça login novamente para continuar gerenciando sua conta com segurança.</p>
+      <div class="session-modal-actions">
+        <button type="button" class="btn-modal-primary" id="sessionLoginBtn">Ir para o Login</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const storedUserStr = localStorage.getItem('facilitAiUser');
+    const authToken = localStorage.getItem('facilitAiToken');
+
+    const confirmDeleteBanner = document.getElementById('confirmDeleteBanner');
+    const successDeleteBanner = document.getElementById('successDeleteBanner');
+
+    function showSessionExpiredModal() {
+      localStorage.removeItem('facilitAiUser');
+      localStorage.removeItem('facilitAiToken');
+      const modal = document.getElementById('sessionExpireModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    document.getElementById('sessionLoginBtn')?.addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    if (!storedUserStr || !authToken) {
+      showSessionExpiredModal();
+    } else {
+      try {
+        const user = JSON.parse(storedUserStr);
+        document.getElementById('profileName').textContent = `${user.nome} ${user.sobrenome}`;
+        document.getElementById('profileEmail').textContent = user.email;
+        
+        const initials = ((user.nome ? user.nome.charAt(0) : '') + (user.sobrenome ? user.sobrenome.charAt(0) : '')).toUpperCase() || 'U';
+        document.getElementById('profileInitials').textContent = initials;
+      } catch (e) {
+        showSessionExpiredModal();
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('facilitAiUser');
+      localStorage.removeItem('facilitAiToken');
+      window.location.href = 'index.html';
+    });
+
+    // Ao clicar em "Excluir Conta Permanentemente", abre o banner inferior verde pastel
+    document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+      confirmDeleteBanner.style.display = 'flex';
+      confirmDeleteBanner.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
+    // Botão Cancelar do banner
+    document.getElementById('cancelDeleteActionBtn').addEventListener('click', () => {
+      confirmDeleteBanner.style.display = 'none';
+    });
+
+    // Botão Confirmar do banner inferior
+    document.getElementById('confirmDeleteActionBtn').addEventListener('click', async () => {
+      const confirmBtn = document.getElementById('confirmDeleteActionBtn');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Excluindo...';
+
+      try {
+        const response = await fetch('http://localhost:8081/api/auth/delete', {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          confirmDeleteBanner.style.display = 'none';
+          showSessionExpiredModal();
+          return;
+        }
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Não foi possível excluir a conta.');
+        }
+
+        // Esconde confirmação e exibe o Banner Verde Pastel de Sucesso
+        confirmDeleteBanner.style.display = 'none';
+        successDeleteBanner.style.display = 'flex';
+
+        localStorage.removeItem('facilitAiUser');
+        localStorage.removeItem('facilitAiToken');
+
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1800);
+      } catch (error) {
+        confirmDeleteBanner.style.display = 'none';
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Sim, Excluir';
+        const profileStatus = document.getElementById('profileStatus');
+        profileStatus.textContent = error.message;
+        profileStatus.style.color = '#e29596';
+      }
+    });
+  </script>
+</body>
+</html>

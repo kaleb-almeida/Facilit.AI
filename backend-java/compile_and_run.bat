@@ -1,20 +1,16 @@
 @echo off
 echo =======================================
-echo Compilando Backend Java Auth...
+echo Compilando e Iniciando Backend Java Auth com Maven...
 echo =======================================
 
-if not exist bin mkdir bin
-
-javac -encoding UTF-8 -cp "lib/postgresql-42.7.3.jar" -d bin src/BCrypt.java src/JWT.java src/Db.java src/Server.java
-
+call mvn clean package
 if %errorlevel% neq 0 (
-    echo [ERRO] Falha na compilação do código Java!
+    echo [ERRO] Falha na compilação do código Java com Maven!
     pause
     exit /b %errorlevel%
 )
 
 echo =======================================
-echo Iniciando Servidor Java Auth...
+echo Iniciando Servidor...
 echo =======================================
-
-java -cp "bin;lib/postgresql-42.7.3.jar" Server
+java -jar target/servidor-auth-1.0-SNAPSHOT.jar

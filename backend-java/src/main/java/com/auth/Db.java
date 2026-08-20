@@ -1,3 +1,4 @@
+package com.auth;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
@@ -14,18 +15,11 @@ public class Db {
     }
 
     private static void loadEnv() {
-        // Tenta ler o .env do diretório raiz ou do backend/
         File envFile = new File(".env");
-        if (!envFile.exists()) {
-            envFile = new File("backend/.env");
-        }
-        if (!envFile.exists()) {
-            envFile = new File("../backend/.env");
-        }
         if (!envFile.exists()) {
             envFile = new File("../.env");
         }
-
+        
         if (envFile.exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(envFile))) {
                 String line;
@@ -38,7 +32,6 @@ public class Db {
                     if (eqIndex > 0) {
                         String key = line.substring(0, eqIndex).trim();
                         String value = line.substring(eqIndex + 1).trim();
-                        // Remove aspas se houver
                         if (value.startsWith("\"") && value.endsWith("\"")) {
                             value = value.substring(1, value.length() - 1);
                         } else if (value.startsWith("'") && value.endsWith("'")) {
@@ -62,17 +55,16 @@ public class Db {
     }
 
     public static Connection getConnection() throws Exception {
-        Class.forName("org.postgresql.Driver");
+        Class.forName("com.mysql.cj.jdbc.Driver");
         
-        String dbUrl = getEnv("DATABASE_URL", "postgresql://postgres:gabyaprigio@localhost:5432/facilitai");
+        String dbUrl = getEnv("DATABASE_URL", "jdbc:mysql://localhost:3306/facilitai");
         
-        // Conversão de URL postgresql:// para jdbc:postgresql://
         String jdbcUrl = dbUrl;
         String user = "";
         String pass = "";
 
-        if (dbUrl.startsWith("postgresql://")) {
-            String cleanUrl = dbUrl.substring("postgresql://".length());
+        if (dbUrl.startsWith("mysql://")) {
+            String cleanUrl = dbUrl.substring("mysql://".length());
             if (cleanUrl.contains("@")) {
                 String[] parts = cleanUrl.split("@");
                 String credentials = parts[0];
@@ -81,13 +73,15 @@ public class Db {
                 if (credentials.contains(":")) {
                     String[] credParts = credentials.split(":");
                     user = credParts[0];
-                    pass = credParts[1];
+                    if (credParts.length > 1) {
+                        pass = credParts[1];
+                    }
                 } else {
                     user = credentials;
                 }
-                jdbcUrl = "jdbc:postgresql://" + hostAndDb;
+                jdbcUrl = "jdbc:mysql://" + hostAndDb;
             } else {
-                jdbcUrl = "jdbc:postgresql://" + cleanUrl;
+                jdbcUrl = "jdbc:mysql://" + cleanUrl;
             }
         } else if (!dbUrl.startsWith("jdbc:")) {
             jdbcUrl = "jdbc:" + dbUrl;
@@ -101,7 +95,7 @@ public class Db {
 
     public static void initializeDatabase() {
         String createUsers = "CREATE TABLE IF NOT EXISTS users (" +
-                "id SERIAL PRIMARY KEY, " +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
                 "nome VARCHAR(255) NOT NULL, " +
                 "sobrenome VARCHAR(255) NOT NULL, " +
                 "email VARCHAR(255) UNIQUE NOT NULL, " +
@@ -110,21 +104,22 @@ public class Db {
                 "last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ")";
         String createConversations = "CREATE TABLE IF NOT EXISTS conversations (" +
-                "id SERIAL PRIMARY KEY, " +
-                "user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, " +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "user_id INT, " +
                 "ai_name VARCHAR(255) NOT NULL, " +
                 "title VARCHAR(255) NOT NULL, " +
-                "messages TEXT NOT NULL, " +
+                "messages LONGTEXT NOT NULL, " +
                 "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, " +
+                "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE" +
                 ")";
         try (Connection conn = getConnection();
              java.sql.Statement stmt = conn.createStatement()) {
             stmt.execute(createUsers);
             stmt.execute(createConversations);
-            System.out.println("Banco de dados: tabelas verificadas/criadas.");
+            System.out.println("Banco de dados (MySQL): tabelas verificadas/criadas.");
         } catch (Exception e) {
-            System.err.println("Aviso: Não foi possível verificar/criar as tabelas: " + e.getMessage());
+            System.err.println("Aviso: Não foi possível verificar/criar as tabelas no MySQL: " + e.getMessage());
         }
     }
 }

@@ -1,13 +1,25 @@
-import pg from 'pg';
+import mysql from 'mysql2/promise';
 
-const { Pool } = pg;
+let pool;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false }
-});
+try {
+  const dbUrl = process.env.DATABASE_URL;
+  // mysql2 suporta URI connection strings como mysql://user:pass@host:port/dbname
+  pool = mysql.createPool({
+    uri: dbUrl,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  });
 
-pool.on('connect', () => console.log('PostgreSQL conectado'));
-pool.on('error', (err) => console.error('Erro no PostgreSQL:', err));
+  // Testando a conexão
+  pool.query('SELECT 1').then(() => {
+    console.log('MySQL conectado');
+  }).catch((err) => {
+    console.error('Erro ao conectar no MySQL:', err);
+  });
+} catch (err) {
+  console.error('Falha ao configurar a conexão MySQL:', err);
+}
 
 export default pool;
