@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let aguardandoClarificacao = false;
   const usuario_id = '';
   let conversa_uuid = new URLSearchParams(window.location.search).get('conversa_uuid') || '';
+  let loadingRow = null;
 
   if (!area) {
     console.error('Adicione o atributo data-area na tag <body>.');
@@ -53,6 +54,23 @@ document.addEventListener('DOMContentLoaded', () => {
       : aguardandoClarificacao
         ? 'Responda às perguntas acima...'
         : 'Escreva sua mensagem...';
+
+    if (isLoading && !loadingRow) {
+      loadingRow = document.createElement('div');
+      loadingRow.className = 'msg-row bot ai-loading-row';
+      loadingRow.setAttribute('role', 'status');
+      loadingRow.setAttribute('aria-label', 'A inteligência artificial está respondendo');
+      loadingRow.innerHTML = `
+        <div class="avatar bot">AI</div>
+        <div class="bubble typing-bubble" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>`;
+      chatInner.appendChild(loadingRow);
+      loadingRow.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    } else if (!isLoading && loadingRow) {
+      loadingRow.remove();
+      loadingRow = null;
+    }
   }
 
   function appendClarificationForm(questions) {

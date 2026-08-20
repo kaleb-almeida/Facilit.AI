@@ -3,7 +3,49 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.38rem;
+  position: relative;
 }
+
+.history-title-row { position: relative; display: flex; align-items: center; width: 100%; min-width: 0; }
+.history-title-row .session-title {
+  display: block; width: 100%; overflow: hidden; white-space: nowrap; padding-right: 3rem;
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 4.5rem), transparent calc(100% - 2.8rem));
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 4.5rem), transparent calc(100% - 2.8rem));
+}
+.history-actions { position: absolute; top: 50%; right: -0.35rem; z-index: 4; transform: translateY(-50%); }
+.history-options-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 3px; width: 2.5rem; height: 2.2rem;
+  border: 0; border-radius: 10px; color: var(--ink-soft, #52635d); background: transparent; cursor: pointer;
+}
+.history-options-button:hover, .history-card.is-menu-open .history-options-button { background: var(--mint-soft, #e8f5f0); }
+.history-options-button span { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.history-options-menu {
+  position: absolute; top: calc(100% + 0.25rem); right: 0; display: none; width: 150px; padding: 0.35rem;
+  border: 1px solid var(--line, #dce5e1); border-radius: 12px; background: #fff; box-shadow: 0 12px 30px rgba(20, 42, 34, 0.16);
+}
+.history-card.is-menu-open .history-options-menu { display: grid; }
+.history-options-menu button { border: 0; border-radius: 8px; padding: 0.65rem 0.75rem; text-align: left; font: inherit; background: transparent; cursor: pointer; }
+.history-options-menu button:hover { background: var(--mint-soft, #e8f5f0); }
+.history-options-menu [data-action="delete"] { color: #bd2929; }
+.history-title-input {
+  width: calc(100% - 2.8rem); border: 0; border-bottom: 1px solid var(--mint-deep, #188260); outline: 0;
+  padding: 0.1rem 0; font: inherit; font-weight: 700; color: inherit; background: transparent;
+}
+.conversation-confirm-backdrop {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 1.25rem; background: rgba(12, 25, 21, 0.48);
+}
+.conversation-confirm-card { width: min(100%, 390px); padding: 1.5rem; border-radius: 18px; background: #fff; box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22); }
+.conversation-confirm-card h3 { margin: 0 0 0.65rem; }
+.conversation-confirm-text { margin: 0; line-height: 1.5; }
+.conversation-confirm-detail { margin: 0.45rem 0 0; color: #9d2828; font-size: 0.88rem; }
+.conversation-confirm-detail.is-error { font-weight: 700; }
+.conversation-confirm-actions { display: flex; justify-content: flex-end; gap: 0.7rem; margin-top: 1.35rem; }
+.conversation-confirm-actions button { border: 1px solid var(--mint-deep, #188260); border-radius: 10px; padding: 0.65rem 1rem; font: inherit; font-weight: 700; cursor: pointer; }
+.conversation-confirm-yes { color: var(--mint-deep, #188260); background: transparent; }
+.conversation-confirm-no { color: #fff; background: var(--mint-deep, #188260); }
+.conversation-confirm-backdrop.is-danger .conversation-confirm-card { border: 2px solid #d83b3b; background: #fff2f2; }
+.conversation-confirm-backdrop.is-danger .conversation-confirm-yes { border-color: #bd2929; color: #a51f1f; }
+.conversation-confirm-backdrop.is-danger .conversation-confirm-no { border-color: #9f2020; background: #bd2929; }
 
 .history-card.is-active {
   border-color: var(--mint-deep);
