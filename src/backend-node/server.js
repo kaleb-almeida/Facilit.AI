@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 function withCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
 const server = http.createServer((req, res) => {
@@ -19,7 +19,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const chave = `${req.method} ${req.url}`;
+  const pathname = new URL(req.url, `http://${req.headers.host || 'localhost'}`).pathname;
+  const chave = `${req.method} ${pathname}`;
   const handler = rotas[chave];
 
   if (handler) {

@@ -41,8 +41,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node backend-node/server.js",
-    "dev": "node --watch scriptsClaude/server.js"
+    "start": "node src/backend-node/server.js",
+    "dev": "node --watch src/backend-node/server.js"
   },
   "repository": {
     "type": "git",

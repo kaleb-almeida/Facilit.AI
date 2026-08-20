@@ -1,5 +1,5 @@
 import { lerCorpoJson } from '../utils/httpBody.js';
-import { pedirProGemini } from '../services/service.js';
+import { pedirProGemini } from '../service/service.js';
 
 export function criarControllerDeArea(area) {
   return async function handler(req, res) {

@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let respostasAnteriores = [];
   let aguardandoClarificacao = false;
   const usuario_id = '';
-  let conversa_uuid = '';
+  let conversa_uuid = new URLSearchParams(window.location.search).get('conversa_uuid') || '';
 
   if (!area) {
     console.error('Adicione o atributo data-area na tag <body>.');
