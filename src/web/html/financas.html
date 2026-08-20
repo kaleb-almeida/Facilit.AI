@@ -1,92 +1,138 @@
 <!doctype html>
 <html lang="pt-BR">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finance.AI — facilit.AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/financas.css" />
-</head>
-
-<body data-area="financas">
-  <div class="top-bar">
-    <div class="brand">
-      <div class="icon-badge"></div>
-      <span class="title">Finance.AI</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finance.AI — facilit.AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="financas.css" />
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="brand">
+        <div class="icon-badge"></div>
+        <span class="title">Finance.AI</span>
+      </div>
+      <div class="right">
+        <a href="index.html" class="back-link">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          <span>Voltar</span>
+        </a>
+      </div>
     </div>
-    <div class="right">
-      <a href="index.html" class="back-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"
-          stroke-linejoin="round">
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-        <span>Voltar</span>
-      </a>
+
+    <div class="main">
+      <div class="conversation-area">
+        <div class="chat-area" id="chatArea">
+          <div class="chat-inner" id="chatInner">
+            <div class="welcome" id="welcomeBlock">
+              <div class="mark"></div>
+              <h1>Como posso ajudar suas finanças?</h1>
+              <p>
+                Sou a Finance.AI. Te ajudo com planejamento financeiro, orçamento pessoal, investimentos básicos e organização das suas contas.
+              </p>
+            </div>
+
+            <div class="suggestions" id="chatSuggestions">
+              <button class="suggestion-chip" type="button">
+                Como montar uma reserva de emergência?
+              </button>
+              <button class="suggestion-chip" type="button">
+                Dicas para cortar gastos mensais
+              </button>
+              <button class="suggestion-chip" type="button">
+                Como organizar minhas dívidas?
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-zone">
+          <form class="input-bar" id="chatForm">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Escreva sua dúvida financeira..."
+              autocomplete="off"
+            />
+            <button
+              type="submit"
+              class="send-btn"
+              id="chatSend"
+              aria-label="Enviar mensagem"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M22 2L11 13" />
+                <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+              </svg>
+            </button>
+          </form>
+        </div>
+        <p class="input-hint">
+          A Finance.AI pode cometer erros e não substitui um contador ou consultor financeiro.
+        </p>
+
+        <aside class="history-sidebar">
+          <div class="history-header">
+            <div>
+              <p class="section-label">Histórico</p>
+              <h2 class="history-title">Minhas conversas</h2>
+            </div>
+            <button class="btn-new-chat-minimal" id="newChatBtn" type="button" title="Iniciar Nova Conversa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Nova conversa</span>
+            </button>
+          </div>
+          <div class="history-list" id="historyList">
+            <div class="history-empty">Abra uma conversa para salvar o histórico.</div>
+          </div>
+        </aside>
+      </div>
     </div>
-  </div>
 
-  <div class="main">
-    <div class="conversation-area">
-      <div class="chat-area" id="chatArea">
-        <div class="chat-inner" id="chatInner">
-          <div class="welcome" id="welcomeBlock">
-            <div class="mark"></div>
-            <h1>Como estão suas finanças hoje?</h1>
-            <p>
-              Sou a IA de finanças. Te ajudo a organizar orçamento, entender seus
-              gastos e criar um plano prático para sair das dívidas.
-            </p>
-          </div>
-
-          <div class="suggestions" id="chatSuggestions">
-            <button class="suggestion-chip" type="button">
-              Montar um orçamento mensal
-            </button>
-            <button class="suggestion-chip" type="button">
-              Plano para sair das dívidas
-            </button>
-            <button class="suggestion-chip" type="button">
-              Como começar a guardar dinheiro
-            </button>
-          </div>
+    <div id="sessionExpireModal" class="session-modal-backdrop" style="display: none;">
+      <div class="session-modal-card">
+        <div class="session-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3>Sessão Expirada</h3>
+        <p>Seu token de acesso expirou. Faça login novamente para continuar salvando seu histórico financeiro com segurança.</p>
+        <div class="session-modal-actions">
+          <button type="button" class="btn-modal-primary" id="sessionLoginBtn">Fazer Login</button>
+          <button type="button" class="btn-modal-secondary" id="sessionDismissBtn">Continuar como Visitante</button>
         </div>
       </div>
-
-      <div class="input-zone">
-        <form class="input-bar" id="chatForm">
-          <input type="text" id="chatInput" placeholder="Escreva sua mensagem..." autocomplete="off" />
-          <button type="submit" class="send-btn" id="chatSend" aria-label="Enviar mensagem">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M22 2L11 13" />
-              <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-            </svg>
-          </button>
-        </form>
-      </div>
-      <p class="input-hint">
-        A Finance.AI pode cometer erros e não substitui um contador ou consultor financeiro.
-      </p>
-
-      <aside class="history-sidebar">
-        <div class="history-header">
-          <div>
-            <p class="section-label">Histórico</p>
-            <h2 class="history-title">Minhas conversas</h2>
-          </div>
-        </div>
-        <div class="history-list" id="historyList">
-          <div class="history-empty">Abra uma conversa para salvar o histórico.</div>
-        </div>
-      </aside>
     </div>
-  </div>
-  
-  <script src="../js/script.js"></script>
-</body>
 
+    <script src="../js/script.js"></script>
+  </body>
 </html>

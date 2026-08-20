@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -170,7 +171,7 @@
     .btn:hover {
       transform: translateY(-1px);
     }
-    
+
     .btn:active {
       transform: translateY(1px);
     }
@@ -186,7 +187,7 @@
       color: #fff;
       box-shadow: 0 4px 15px rgba(250, 101, 35, 0.25);
     }
-    
+
     .btn-logout:hover {
       opacity: 0.94;
     }
@@ -396,6 +397,7 @@
         opacity: 0;
         transform: translate(-50%, 30px) scale(0.95);
       }
+
       to {
         opacity: 1;
         transform: translate(-50%, 0) scale(1);
@@ -403,13 +405,25 @@
     }
 
     @keyframes fadeInModal {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
 
     @keyframes slideUpModal {
-      from { opacity: 0; transform: translateY(20px) scale(0.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     @media (max-width: 768px) {
@@ -417,25 +431,31 @@
         top: 20px;
         left: 20px;
       }
+
       .profile-card {
         flex-direction: column;
         padding: 40px 20px;
         text-align: center;
         margin-top: 80px;
       }
-      .col-left, .col-right {
+
+      .col-left,
+      .col-right {
         flex: 1 1 auto;
         width: 100%;
       }
+
       .btn {
         width: 100%;
       }
+
       .bottom-floating-banner {
         flex-direction: column;
         text-align: center;
         padding: 1.2rem;
         bottom: 15px;
       }
+
       .banner-actions {
         width: 100%;
         justify-content: center;
@@ -443,12 +463,13 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Botão Voltar Simples -->
   <a href="index.html" class="back-btn">
     <svg viewBox="0 0 24 24">
-      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
     </svg>
     Voltar
   </a>
@@ -475,12 +496,18 @@
         <!-- Botão Logout -->
         <button id="logoutBtn" class="btn btn-logout">
           <span>Sair da Conta</span>
-          <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+          </svg>
         </button>
 
         <!-- Botão Excluir -->
         <button id="deleteAccountBtn" class="btn btn-delete">
-          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z" />
+          </svg>
           <span>Excluir Conta Permanentemente</span>
         </button>
       </div>
@@ -491,7 +518,8 @@
   <!-- 1. Ícone Verde Pastel: "Tem certeza que deseja excluir sua conta?" (Inferior do site) -->
   <div id="confirmDeleteBanner" class="bottom-floating-banner" style="display: none;">
     <div class="banner-icon-mint">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"
+        stroke-linejoin="round">
         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
         <line x1="12" y1="9" x2="12" y2="13"></line>
         <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -510,7 +538,8 @@
   <!-- 2. Ícone Verde Pastel: "Conta excluída com sucesso" (Inferior do site) -->
   <div id="successDeleteBanner" class="bottom-floating-banner banner-success" style="display: none;">
     <div class="banner-icon-mint">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+        stroke-linejoin="round">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
       </svg>
@@ -525,112 +554,23 @@
   <div id="sessionExpireModal" class="session-modal-backdrop" style="display: none;">
     <div class="session-modal-card">
       <div class="session-modal-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
       </div>
       <h3>Sessão Expirada</h3>
-      <p>Seu token de acesso expirou ou não é mais válido. Faça login novamente para continuar gerenciando sua conta com segurança.</p>
+      <p>Seu token de acesso expirou ou não é mais válido. Faça login novamente para continuar gerenciando sua conta com
+        segurança.</p>
       <div class="session-modal-actions">
         <button type="button" class="btn-modal-primary" id="sessionLoginBtn">Ir para o Login</button>
       </div>
     </div>
   </div>
 
-  <script>
-    const storedUserStr = localStorage.getItem('facilitAiUser');
-    const authToken = localStorage.getItem('facilitAiToken');
-
-    const confirmDeleteBanner = document.getElementById('confirmDeleteBanner');
-    const successDeleteBanner = document.getElementById('successDeleteBanner');
-
-    function showSessionExpiredModal() {
-      localStorage.removeItem('facilitAiUser');
-      localStorage.removeItem('facilitAiToken');
-      const modal = document.getElementById('sessionExpireModal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    document.getElementById('sessionLoginBtn')?.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
-
-    if (!storedUserStr || !authToken) {
-      showSessionExpiredModal();
-    } else {
-      try {
-        const user = JSON.parse(storedUserStr);
-        document.getElementById('profileName').textContent = `${user.nome} ${user.sobrenome}`;
-        document.getElementById('profileEmail').textContent = user.email;
-        
-        const initials = ((user.nome ? user.nome.charAt(0) : '') + (user.sobrenome ? user.sobrenome.charAt(0) : '')).toUpperCase() || 'U';
-        document.getElementById('profileInitials').textContent = initials;
-      } catch (e) {
-        showSessionExpiredModal();
-      }
-    }
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem('facilitAiUser');
-      localStorage.removeItem('facilitAiToken');
-      window.location.href = 'index.html';
-    });
-
-    // Ao clicar em "Excluir Conta Permanentemente", abre o banner inferior verde pastel
-    document.getElementById('deleteAccountBtn').addEventListener('click', () => {
-      confirmDeleteBanner.style.display = 'flex';
-      confirmDeleteBanner.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    });
-
-    // Botão Cancelar do banner
-    document.getElementById('cancelDeleteActionBtn').addEventListener('click', () => {
-      confirmDeleteBanner.style.display = 'none';
-    });
-
-    // Botão Confirmar do banner inferior
-    document.getElementById('confirmDeleteActionBtn').addEventListener('click', async () => {
-      const confirmBtn = document.getElementById('confirmDeleteActionBtn');
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = 'Excluindo...';
-
-      try {
-        const response = await fetch('http://localhost:8081/api/auth/delete', {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-
-        if (response.status === 401 || response.status === 403) {
-          confirmDeleteBanner.style.display = 'none';
-          showSessionExpiredModal();
-          return;
-        }
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Não foi possível excluir a conta.');
-        }
-
-        // Esconde confirmação e exibe o Banner Verde Pastel de Sucesso
-        confirmDeleteBanner.style.display = 'none';
-        successDeleteBanner.style.display = 'flex';
-
-        localStorage.removeItem('facilitAiUser');
-        localStorage.removeItem('facilitAiToken');
-
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1800);
-      } catch (error) {
-        confirmDeleteBanner.style.display = 'none';
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = 'Sim, Excluir';
-        const profileStatus = document.getElementById('profileStatus');
-        profileStatus.textContent = error.message;
-        profileStatus.style.color = '#e29596';
-      }
-    });
-  </script>
+  <script src="../js/perfil.js"></script>
 </body>
+
 </html>
