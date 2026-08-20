@@ -1,4 +1,5 @@
 const HISTORICO_API_URL = 'http://localhost:3000/api/historico';
+const ALTERAR_TITULO_API_URL = 'http://localhost:3000/api/conversas/titulo';
 const CONVERSA_WRITE_API_URL = 'http://localhost:8080/iaController';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -35,15 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array.isArray(data.dados) ? data.dados : [];
   }
   async function alterarConversa(method, item, titulo) {
-    const id = usuarioId();
-    if (!id) throw new Error('Não foi possível identificar o usuário. Entre novamente na sua conta.');
-    const body = { conversa_uuid: item.conversa_uuid, usuario_id: id, assistente_tipo: item.assistente_tipo };
+    const body = { conversa_uuid: item.conversa_uuid, assistente_tipo: item.assistente_tipo };
     if (method === 'PUT') body.titulo = titulo;
-    const response = await fetch(CONVERSA_WRITE_API_URL, {
-      method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    if (method === 'DELETE') {
+      const id = usuarioId();
+      if (!id) throw new Error('Não foi possível identificar o usuário. Entre novamente na sua conta.');
+      body.usuario_id = id;
+    }
+    const url = method === 'PUT' ? ALTERAR_TITULO_API_URL : CONVERSA_WRITE_API_URL;
+    const requestHeaders = { 'Content-Type': 'application/json' };
+    if (method === 'PUT') requestHeaders.Authorization = `Bearer ${token}`;
+    const response = await fetch(url, {
+      method, headers: requestHeaders, body: JSON.stringify(body),
     });
     const data = response.status === 204 ? {} : await response.json().catch(() => ({}));
-    if (!response.ok || data.sucesso === false) throw new Error(data.mensagem || 'Não foi possível concluir a ação.');
+    if (!response.ok || (method === 'PUT' ? data.sucesso !== true || data.mensagem !== 'OK' : data.sucesso === false)) {
+      const mensagem = method === 'PUT'
+        ? 'Erro ao tentar mudar o título, tente novamente'
+        : data.mensagem || 'Não foi possível concluir a ação.';
+      throw new Error(mensagem);
+    }
   }
   function fecharMenus() {
     document.querySelectorAll('.history-card.is-menu-open').forEach((card) => {
@@ -168,7 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (evento.key !== 'Enter') return;
         evento.preventDefault();
         const novoTitulo = input.value.trim();
-        if (!novoTitulo) return;
+        if (!novoTitulo) {
+          terminou = true;
+          input.replaceWith(titulo);
+          confirmarAcao({
+            titulo: 'Mudar título',
+            texto: 'Deseja mesmo mudar o título da conversa?',
+            detalhe: 'O título não pode estar vazio',
+            aoConfirmar: async () => { throw new Error('O título não pode estar vazio'); },
+          });
+          return;
+        }
         terminou = true;
         input.replaceWith(titulo);
         confirmarAcao({ titulo: 'Mudar título', texto: 'Deseja mesmo mudar o título da conversa?', aoConfirmar: async () => {

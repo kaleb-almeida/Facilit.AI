@@ -1,4 +1,4 @@
-import { buscarConversa, buscarTitulosDasConversas } from '../api/api.js';
+import { alterarTituloDaConversa, buscarConversa, buscarTitulosDasConversas } from '../api/api.js';
 
 export async function consultarTitulosNoJava(usuarioId) {
   const resposta = await buscarTitulosDasConversas(String(usuarioId));
@@ -7,5 +7,15 @@ export async function consultarTitulosNoJava(usuarioId) {
 
 export async function consultarConversaNoJava(conversaUuid, usuarioId, assistenteTipo) {
   const resposta = await buscarConversa(conversaUuid, String(usuarioId), assistenteTipo);
+  return resposta.corpo;
+}
+
+export async function alterarTituloNoJava(titulo, conversaUuid, usuarioId, assistenteTipo) {
+  const resposta = await alterarTituloDaConversa(
+    titulo,
+    conversaUuid,
+    String(usuarioId),
+    assistenteTipo,
+  );
   return resposta.corpo;
 }
