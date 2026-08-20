@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Quicksand:wght@300..700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../css/index.css">
+  <title>facilit.AI – Resolvendo a sua vida</title>
+</head>
+
+<body>
+  <nav>
+    <div class="logo">facilit<span>.AI</span></div>
+    <ul>
+      <li><a href="#hero">Início</a></li>
+      <li><a href="#ias">Soluções</a></li>
+      <li><a href="#como">Como funciona</a></li>
+      <li><a href="#loginModal" class="nav-cta" id="openLoginModal">Começar agora</a></li>
+    </ul>
+  </nav>
+
+  <section id="hero">
+    <canvas id="particles"></canvas>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <h1 class="hero-title fade-up delay-2">
+      <span class="brand">facilit.AI</span>
+      Resolvendo a sua vida
+    </h1>
+
+    <p class="hero-sub fade-up delay-3">
+      Quatro inteligências artificiais especializadas nas áreas que mais travam a sua vida. Trabalho, finanças, saúde
+      mental e educação — finalmente simplificados.
+    </p>
+
+    <div class="hero-actions fade-up delay-4">
+      <a href="#ias" class="btn-primary">Conhecer as IAs</a>
+      <a href="#como" class="btn-secondary">Como funciona</a>
+    </div>
+
+    <div class="stats-strip fade-up delay-5">
+      <div class="stat">
+        <div class="stat-num">4</div>
+        <div class="stat-label">IAs especializadas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Disponibilidade</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Personalizado</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Possibilidades</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ias">
+    <p class="section-label">Nossas soluções</p>
+    <h2 class="section-title">Uma IA para cada desafio da sua vida</h2>
+    <p class="section-desc">Cada solução foi construída para entender profundamente o seu contexto e oferecer respostas
+      que realmente funcionam.</p>
+
+    <div class="cards-grid">
+
+      <div class="card card-trabalho">
+        <div class="card-accent"></div>
+        <div class="card-icon-wrap card-icon-bg">💼</div>
+        <h3 class="card-title">Work.AI</h3>
+        <p class="card-desc">
+          A Work.AI te ajuda nas entrevistas, na produtividade e na organização do seu trabalho. Ela entende seu
+          contexto e te dá soluções práticas para o seu problema.
+        </p>
+        <div>
+          <span class="tag">Produtividade</span>
+          <span class="tag">Carreira</span>
+          <span class="tag">Rotina</span>
+        </div>
+        <a href="trabalho.html" class="card-cta">
+          Experimentar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+      <div class="card card-financas">
+        <div class="card-accent"></div>
+        <div class="card-icon-wrap card-icon-bg">💰</div>
+        <h3 class="card-title">Finance.AI</h3>
+        <p class="card-desc">
+          Dívidas, gastos descontrolados e fim de mês no vermelho. A Finance.AI analisa suas finanças, identifica onde
+          seu
+          dinheiro vai e cria um plano real de saída das dívidas.
+        </p>
+        <div>
+          <span class="tag">Orçamento</span>
+          <span class="tag">Investimentos</span>
+          <span class="tag">Dívidas</span>
+        </div>
+        <a href="financas.html" class="card-cta">
+          Experimentar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="card card-saude">
+        <div class="card-accent"></div>
+        <div class="card-icon-wrap card-icon-bg">🧠</div>
+        <h3 class="card-title">Mental.AI</h3>
+        <p class="card-desc">
+          Ansiedade, estresse, pensamentos que não param. A Mental.AI é sua parceira emocional: escuta sem julgamento,
+          oferece técnicas baseadas em evidências e te acompanha no dia a dia.
+        </p>
+        <div>
+          <span class="tag">Ansiedade</span>
+          <span class="tag">Bem-estar</span>
+          <span class="tag">Conselhos</span>
+        </div>
+        <a href="saude-mental.html" class="card-cta">
+          Experimentar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+      <div class="card card-educacao">
+        <div class="card-accent"></div>
+        <div class="card-icon-wrap card-icon-bg">📚</div>
+        <h3 class="card-title">Education.AI</h3>
+        <p class="card-desc">
+          Dificuldade em aprender, conteúdos complexos e falta de tempo para estudar. A Education.AI adapta o
+          aprendizado ao
+          seu ritmo, explica qualquer assunto do seu jeito e cria cronogramas personalizados.
+        </p>
+        <div>
+          <span class="tag">Aprendizado</span>
+          <span class="tag">Concursos</span>
+          <span class="tag">Habilidades</span>
+        </div>
+        <a href="educacao.html" class="card-cta">
+          Experimentar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+  <section id="como">
+    <p class="section-label">Processo</p>
+    <h2 class="section-title">Simples assim</h2>
+    <p class="section-desc">Sem curva de aprendizado, sem configuração complicada. Em minutos você já está resolvendo o
+      que travava sua vida.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Escolha a IA</div>
+        <p class="step-text">Selecione a área que precisa de atenção agora.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Conte sua situação</div>
+        <p class="step-text">Fale livremente, como numa conversa real.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Receba o plano</div>
+        <p class="step-text">A IA analisa e entrega respostas práticas.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Viva melhor</div>
+        <p class="step-text">Execute, acompanhe e evolua com a IA.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cta-final">
+    <p class="section-label">Comece hoje</p>
+    <h2 class="section-title">Sua vida pode ser mais fácil do que você imagina</h2>
+    <p class="section-desc">Junte-se a milhares de pessoas que já estão usando inteligência artificial para resolver o
+      que parecia impossível.</p>
+    <a href="#ias" class="btn-primary">Escolher minha IA agora</a>
+  </section>
+  <div class="modal-backdrop" id="loginModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <button type="button" class="modal-close" id="closeLoginModal" aria-label="Fechar">×</button>
+      <div class="hero-login-card" aria-label="Cadastro de usuário">
+        <h3 id="loginTitle">Cadastre-se</h3>
+        <p>Cadastre seu nome, sobrenome e e-mail para começar com a sua experiência personalizada.</p>
+        <form id="loginForm" class="hero-login-form">
+          <label class="field">
+            <span>Nome</span>
+            <input type="text" name="nome" placeholder="Seu nome" required>
+          </label>
+          <label class="field">
+            <span>Sobrenome</span>
+            <input type="text" name="sobrenome" placeholder="Seu sobrenome" required>
+          </label>
+          <label class="field full">
+            <span>E-mail</span>
+            <input type="email" name="email" placeholder="seu@email.com" required>
+          </label>
+          <label class="field full">
+            <span>Senha</span>
+            <input type="password" name="senha" placeholder="Crie uma senha" required>
+          </label>
+          <button type="submit" class="login-btn">Criar conta</button>
+        </form>
+        <div id="loginStatus" class="form-status" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="logo">facilit<span>.AI</span>
+    </div>
+    <p>© 2026 facilit.AI — Resolvendo a sua vida</p>
+    <div class="footer-links">
+      <a href="#">Privacidade</a>
+      <a href="#">Termos</a>
+      <a href="#">Contato</a>
+    </div>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function createParticle() {
+      const colors = ['#188260', '#FA6523'];
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.25 + 0.08,
+      };
+    }
+
+    for (let i = 0; i < 90; i++) particles.push(createParticle());
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fill();
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+      });
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    const openLoginModalBtn = document.getElementById('openLoginModal');
+    const loginModal = document.getElementById('loginModal');
+    const closeLoginModalBtn = document.getElementById('closeLoginModal');
+    const loginForm = document.getElementById('loginForm');
+    const loginStatus = document.getElementById('loginStatus');
+    const loginTitle = document.getElementById('loginTitle');
+    const loginSubtitle = document.getElementById('loginSubtitle');
+    const authToggleButtons = document.querySelectorAll('.auth-toggle-btn');
+    const registeredFields = document.querySelectorAll('.register-only');
+    const storedUser = JSON.parse(localStorage.getItem('facilitAiUser') || 'null');
+    let authMode = 'register';
+
+    function openLoginModal() {
+      loginModal.classList.add('active');
+      loginModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLoginModal() {
+      loginModal.classList.remove('active');
+      loginModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      authToggleButtons.forEach((button) => {
+        button.classList.toggle('active', button.dataset.mode === mode);
+      });
+      registeredFields.forEach((field) => field.classList.toggle('is-hidden', mode !== 'register'));
+      loginTitle.textContent = mode === 'register' ? 'Cadastre-se' : 'Entre na sua conta';
+      loginSubtitle.textContent = mode === 'register'
+        ? 'Cadastre seu nome, sobrenome e e-mail para começar com a sua experiência personalizada.'
+        : 'Acesse sua conta para salvar o perfil e recuperar o histórico das conversas.';
+      document.querySelector('.login-btn').textContent = mode === 'register' ? 'Criar conta' : 'Entrar';
+    }
+
+    openLoginModalBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      openLoginModal();
+    });
+
+    closeLoginModalBtn?.addEventListener('click', closeLoginModal);
+
+    loginModal?.addEventListener('click', (event) => {
+      if (event.target === loginModal) {
+        closeLoginModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeLoginModal();
+      }
+    });
+
+    authToggleButtons.forEach((button) => {
+      button.addEventListener('click', () => setAuthMode(button.dataset.mode));
+    });
+
+    if (storedUser) {
+      loginStatus.textContent = `Bem-vindo(a), ${storedUser.nome} ${storedUser.sobrenome}!`;
+      loginStatus.classList.add('success');
+    }
+
+    loginForm?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(loginForm);
+      const nome = String(formData.get('nome') || '').trim();
+      const sobrenome = String(formData.get('sobrenome') || '').trim();
+      const email = String(formData.get('email') || '').trim();
+      const senha = String(formData.get('senha') || '').trim();
+
+      if (!email || !senha) {
+        loginStatus.textContent = 'Informe e-mail e senha para continuar.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+        return;
+      }
+
+      if (authMode === 'register' && (!nome || !sobrenome)) {
+        loginStatus.textContent = 'Preencha nome, sobrenome, e-mail e senha para criar uma conta.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+        return;
+      }
+
+      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailValido) {
+        loginStatus.textContent = 'Informe um e-mail válido.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+        return;
+      }
+
+      try {
+        loginStatus.textContent = authMode === 'register' ? 'Criando conta...' : 'Entrando...';
+        const response = await fetch(`http://localhost:3000/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(authMode === 'register' ? { nome, sobrenome, email, senha } : { email, senha })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Não foi possível concluir a ação.');
+        }
+
+        localStorage.setItem('facilitAiUser', JSON.stringify(data.user));
+        localStorage.setItem('facilitAiToken', data.token);
+        loginStatus.textContent = authMode === 'register'
+          ? `Conta criada com sucesso! Bem-vindo(a), ${data.user.nome} ${data.user.sobrenome}.`
+          : `Login realizado com sucesso! Bem-vindo(a), ${data.user.nome} ${data.user.sobrenome}.`;
+        loginStatus.classList.remove('error');
+        loginStatus.classList.add('success');
+        loginForm.reset();
+        closeLoginModal();
+      } catch (error) {
+        loginStatus.textContent = error.message || 'Não foi possível concluir a ação.';
+        loginStatus.classList.remove('success');
+        loginStatus.classList.add('error');
+      }
+    });
+
+    const cards = document.querySelectorAll('.card');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          e.target.style.animation = `fadeUp 0.6s ease ${i * 0.12}s forwards`;
+          e.target.style.opacity = '0';
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    cards.forEach(c => obs.observe(c));
+  </script>
+</body>
+
+</html>
