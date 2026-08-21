@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const suggestions = document.getElementById('chatSuggestions');
   const area = document.body.dataset.area;
   const endpoint = `${API_BASE_URL}/api/${area}`;
+  const authToken = localStorage.getItem('facilitAiToken') || '';
 
   let perguntaOriginal = '';
   let respostasAnteriores = [];
   let aguardandoClarificacao = false;
-  const usuario_id = '';
   let conversa_uuid = new URLSearchParams(window.location.search).get('conversa_uuid') || '';
   let loadingRow = null;
 
@@ -141,20 +141,34 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function enviarParaIa(pergunta, respostasClarificacao = []) {
+    if (!authToken) {
+      document.getElementById('sessionExpireModal')?.style.setProperty('display', 'flex');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
         body: JSON.stringify({
-          usuario_id,
           conversa_uuid,
           pergunta,
           respostasClarificacao,
         }),
       });
       const data = await response.json();
+
+      if (response.status === 401) {
+        localStorage.removeItem('facilitAiUser');
+        localStorage.removeItem('facilitAiToken');
+        document.getElementById('sessionExpireModal')?.style.setProperty('display', 'flex');
+        return;
+      }
 
       if (!response.ok) {
         appendMessage(data.error || 'Ocorreu um erro ao processar sua pergunta.', 'bot');

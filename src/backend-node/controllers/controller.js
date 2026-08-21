@@ -1,9 +1,23 @@
 import { lerCorpoJson } from '../utils/httpBody.js';
 import { pedirProGemini } from '../service/service.js';
+import { validarTokenERetornarId } from '../utils/tokenValidator.js';
+
+function obterToken(req) {
+  const authorization = req.headers.authorization;
+
+  if (typeof authorization !== 'string' || !authorization.startsWith('Bearer ')) {
+    const erro = new Error('Token de autenticacao nao informado.');
+    erro.status = 401;
+    throw erro;
+  }
+
+  return authorization.slice(7);
+}
 
 export function criarControllerDeArea(area) {
   return async function handler(req, res) {
     try {
+      const usuarioId = validarTokenERetornarId(obterToken(req));
       const dados = await lerCorpoJson(req);
 
       if (!dados || typeof dados.pergunta !== 'string' || dados.pergunta.trim() === '') {
@@ -12,10 +26,10 @@ export function criarControllerDeArea(area) {
         return;
       }
 
-      if (typeof dados.usuario_id !== 'string' || typeof dados.conversa_uuid !== 'string') {
+      if (typeof dados.conversa_uuid !== 'string') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-          error: 'Os campos "usuario_id" e "conversa_uuid" devem ser textos.',
+          error: 'O campo "conversa_uuid" deve ser um texto.',
         }));
         return;
       }
@@ -46,7 +60,7 @@ export function criarControllerDeArea(area) {
         area,
         dados.pergunta.trim(),
         respostasClarificacao,
-        dados.usuario_id,
+        String(usuarioId),
         dados.conversa_uuid
       );
 
@@ -75,6 +89,14 @@ export function criarControllerDeArea(area) {
       console.error(
         `[IA:${area}] Falha${statusExterno ? ` (status ${statusExterno})` : ''}: ${detalheSeguro}`
       );
+
+      if (error?.status === 401 ||
+          error instanceof TypeError && error.message === 'O token JWT e obrigatorio.' ||
+          typeof error?.message === 'string' && error.message.includes('token JWT')) {
+        res.writeHead(401, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: error.message }));
+        return;
+      }
 
       // JSON inválido enviado pelo cliente -> erro do cliente, não do servidor
       if (error?.message === 'JSON inválido no corpo da requisição.') {
