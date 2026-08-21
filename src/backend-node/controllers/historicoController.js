@@ -1,4 +1,4 @@
-import { alterarTituloService, consultarHistoricoService } from '../services/historicoService.js';
+import { alterarTituloService, consultarHistoricoService, deletarConversaService } from '../services/historicoService.js';
 import { validarTokenERetornarId } from '../utils/tokenValidator.js';
 import { lerCorpoJson } from '../utils/httpBody.js';
 
@@ -60,6 +60,29 @@ export async function alterarTituloController(req, res) {
     res.end(JSON.stringify({
       sucesso: false,
       mensagem: erro.message || 'Erro ao tentar mudar o titulo, tente novamente.',
+    }));
+  }
+}
+
+export async function deletarConversaController(req, res) {
+  try {
+    const usuarioId = validarTokenERetornarId(obterToken(req));
+    const dados = await lerCorpoJson(req);
+    await deletarConversaService({
+      conversaUuid: dados.conversa_uuid,
+      usuarioId,
+      assistenteTipo: dados.assistente_tipo,
+    });
+
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ sucesso: true, mensagem: 'OK' }));
+  } catch (erro) {
+    const status = erro?.message === 'JSON inválido no corpo da requisição.' ? 400 : statusDoErro(erro);
+    console.error(`[Conversa] Falha ao deletar (${status}): ${erro.message}`);
+    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({
+      sucesso: false,
+      mensagem: erro.message || 'Erro ao tentar deletar, tente novamente.',
     }));
   }
 }

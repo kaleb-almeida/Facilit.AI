@@ -1,6 +1,6 @@
 const HISTORICO_API_URL = 'http://localhost:3000/api/historico';
 const ALTERAR_TITULO_API_URL = 'http://localhost:3000/api/conversas/titulo';
-const CONVERSA_WRITE_API_URL = 'http://localhost:8080/iaController';
+const DELETAR_CONVERSA_API_URL = 'http://localhost:3000/api/conversas/delete';
 
 document.addEventListener('DOMContentLoaded', () => {
   const historyList = document.getElementById('historyList');
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const newChatButton = document.getElementById('newChatBtn');
   const token = localStorage.getItem('facilitAiToken') || '';
   const areaAtual = document.body.dataset.area;
-  const conversaAtiva = new URLSearchParams(window.location.search).get('conversa_uuid') || '';
+  let conversaAtiva = new URLSearchParams(window.location.search).get('conversa_uuid') || '';
   const assistentes = {
     financas: { nome: 'Finanças', pagina: 'financas.html' },
     trabalho: { nome: 'Trabalho', pagina: 'trabalho.html' },
@@ -16,15 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     educacao: { nome: 'Educação', pagina: 'educacao.html' },
   };
   if (!historyList || !chatInner) return;
+  const conteudoInicialChat = chatInner.innerHTML;
 
   const headers = () => ({ Authorization: `Bearer ${token}` });
-  function usuarioId() {
-    try {
-      const trecho = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(trecho));
-      return String(payload.usuario_id ?? payload.id ?? payload.sub ?? '');
-    } catch { return ''; }
-  }
   function mostrarSessaoExpirada() {
     const modal = document.getElementById('sessionExpireModal');
     if (modal) modal.style.display = 'flex';
@@ -38,24 +32,27 @@ document.addEventListener('DOMContentLoaded', () => {
   async function alterarConversa(method, item, titulo) {
     const body = { conversa_uuid: item.conversa_uuid, assistente_tipo: item.assistente_tipo };
     if (method === 'PUT') body.titulo = titulo;
-    if (method === 'DELETE') {
-      const id = usuarioId();
-      if (!id) throw new Error('Não foi possível identificar o usuário. Entre novamente na sua conta.');
-      body.usuario_id = id;
-    }
-    const url = method === 'PUT' ? ALTERAR_TITULO_API_URL : CONVERSA_WRITE_API_URL;
-    const requestHeaders = { 'Content-Type': 'application/json' };
-    if (method === 'PUT') requestHeaders.Authorization = `Bearer ${token}`;
+    const url = method === 'PUT' ? ALTERAR_TITULO_API_URL : DELETAR_CONVERSA_API_URL;
+    const requestHeaders = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
     const response = await fetch(url, {
       method, headers: requestHeaders, body: JSON.stringify(body),
     });
     const data = response.status === 204 ? {} : await response.json().catch(() => ({}));
-    if (!response.ok || (method === 'PUT' ? data.sucesso !== true || data.mensagem !== 'OK' : data.sucesso === false)) {
+    if (!response.ok || data.sucesso !== true || data.mensagem !== 'OK') {
       const mensagem = method === 'PUT'
         ? 'Erro ao tentar mudar o título, tente novamente'
         : data.mensagem || 'Não foi possível concluir a ação.';
       throw new Error(mensagem);
     }
+  }
+  function mostrarAviso(mensagem, tipo) {
+    document.querySelector('.conversation-notice')?.remove();
+    const aviso = document.createElement('div');
+    aviso.className = `conversation-notice is-${tipo}`;
+    aviso.setAttribute('role', tipo === 'success' ? 'status' : 'alert');
+    aviso.textContent = mensagem;
+    document.body.appendChild(aviso);
+    window.setTimeout(() => aviso.remove(), 4000);
   }
   function fecharMenus() {
     document.querySelectorAll('.history-card.is-menu-open').forEach((card) => {
@@ -205,10 +202,20 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       fecharMenus();
       confirmarAcao({ perigo: true, titulo: 'Apagar conversa', texto: 'Você deseja realmente apagar esta conversa?', detalhe: 'Esta ação é irreversível.', aoConfirmar: async () => {
-        await alterarConversa('DELETE', item);
-        card.remove();
-        if (item.conversa_uuid === conversaAtiva) window.location.href = window.location.pathname;
-        else if (!historyList.querySelector('.history-card')) historyList.innerHTML = '<div class="history-empty">Nenhuma conversa encontrada.</div>';
+        try {
+          await alterarConversa('DELETE', item);
+          if (item.conversa_uuid === conversaAtiva) {
+            conversaAtiva = '';
+            window.history.replaceState(null, '', window.location.pathname);
+            chatInner.innerHTML = conteudoInicialChat;
+            document.title = 'facilit.AI';
+          }
+          await carregarTitulos();
+          mostrarAviso('Conversa apagada com sucesso', 'success');
+        } catch (erro) {
+          mostrarAviso('Erro ao tentar deletar, tente novamente', 'error');
+          throw erro;
+        }
       }});
     });
     return card;

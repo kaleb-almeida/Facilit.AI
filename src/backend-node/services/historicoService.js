@@ -1,4 +1,4 @@
-import { alterarTituloNoJava, consultarConversaNoJava, consultarTitulosNoJava } from '../models/historicoModel.js';
+import { alterarTituloNoJava, consultarConversaNoJava, consultarTitulosNoJava, deletarConversaNoJava } from '../models/historicoModel.js';
 
 const ASSISTENTES_VALIDOS = new Set(['financas', 'trabalho', 'saudemental', 'educacao']);
 
@@ -44,4 +44,19 @@ export async function alterarTituloService({ titulo, conversaUuid, usuarioId, as
   }
 
   return alterarTituloNoJava(titulo.trim(), conversaUuid.trim(), usuarioId, assistenteTipo);
+}
+
+export async function deletarConversaService({ conversaUuid, usuarioId, assistenteTipo }) {
+  if (typeof conversaUuid !== 'string' || conversaUuid.trim() === '') {
+    const erro = new TypeError('O campo "conversa_uuid" e obrigatorio.');
+    erro.status = 400;
+    throw erro;
+  }
+  if (!ASSISTENTES_VALIDOS.has(assistenteTipo)) {
+    const erro = new TypeError('O campo "assistente_tipo" e invalido.');
+    erro.status = 400;
+    throw erro;
+  }
+
+  return deletarConversaNoJava(conversaUuid.trim(), usuarioId, assistenteTipo);
 }

@@ -47,6 +47,14 @@
 .conversation-confirm-backdrop.is-danger .conversation-confirm-yes { border-color: #bd2929; color: #a51f1f; }
 .conversation-confirm-backdrop.is-danger .conversation-confirm-no { border-color: #9f2020; background: #bd2929; }
 
+.conversation-notice {
+  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 1100; max-width: min(420px, calc(100vw - 2.5rem));
+  padding: 0.9rem 1.1rem; border: 1px solid; border-radius: 12px; color: #17352b; background: #e8f5f0;
+  box-shadow: 0 12px 30px rgba(20, 42, 34, 0.2); font-weight: 700;
+}
+.conversation-notice.is-success { border-color: #188260; }
+.conversation-notice.is-error { border-color: #bd2929; color: #8f2020; background: #fff2f2; }
+
 .history-card.is-active {
   border-color: var(--mint-deep);
   background: var(--mint-soft);

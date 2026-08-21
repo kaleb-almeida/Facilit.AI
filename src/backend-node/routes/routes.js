@@ -1,5 +1,5 @@
 import { criarControllerDeArea } from '../controllers/controller.js';
-import { alterarTitulo, consultarHistorico } from './historicoRoutes.js';
+import { alterarTitulo, consultarHistorico, deletarConversa } from './historicoRoutes.js';
 
 export const rotas = {
   'POST /api/financas': criarControllerDeArea('financas'),
@@ -8,4 +8,5 @@ export const rotas = {
   'POST /api/educacao': criarControllerDeArea('educacao'),
   'GET /api/historico': consultarHistorico,
   'PUT /api/conversas/titulo': alterarTitulo,
+  'DELETE /api/conversas/delete': deletarConversa,
 };
