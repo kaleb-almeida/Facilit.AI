@@ -161,7 +161,7 @@ loginForm?.addEventListener('submit', async (event) => {
 
     try {
         loginStatus.textContent = authMode === 'register' ? 'Criando conta...' : 'Entrando...';
-        const response = await fetch(`http://localhost:8081/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
+        const response = await fetch(`http://localhost:8080/facilitai/api/auth/${authMode === 'register' ? 'register' : 'login'}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(authMode === 'register' ? { nome, sobrenome, email, senha } : { email, senha })

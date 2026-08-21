@@ -2,6 +2,11 @@ import { GoogleGenAI } from '@google/genai';
 import { config } from 'dotenv';
 import crypto from 'node:crypto';
 import { markdownParaHtml } from '../utils/markdownParaHtml.js';
+import {
+  buscarConversa,
+  buscarTitulosDasConversas,
+  enviarMensagemParaIaController,
+} from '../api/api.js';
 
 config();
 
@@ -23,6 +28,75 @@ const PROMPTS_POR_AREA = {
 };
 
 const AREAS_TEMPERATURA_BAIXA = new Set(['financas', 'educacao']);
+const conversasEmMemoria = new Map();
+
+function chaveDaConversa(usuarioId, area, conversaUuid) {
+  return `${usuarioId}:${area}:${conversaUuid}`;
+}
+
+async function carregarConversa(usuarioId, area, conversaUuid) {
+  const chave = chaveDaConversa(usuarioId, area, conversaUuid);
+  if (conversasEmMemoria.has(chave)) return conversasEmMemoria.get(chave);
+
+  const [respostaTitulos, respostaConversa] = await Promise.all([
+    buscarTitulosDasConversas(String(usuarioId)),
+    buscarConversa(conversaUuid, String(usuarioId), area),
+  ]);
+  const item = respostaTitulos.corpo.dados.find((titulo) =>
+    titulo?.conversa_uuid === conversaUuid && titulo?.assistente_tipo === area
+  );
+
+  if (!item || typeof item.titulo !== 'string' || item.titulo.trim() === '') {
+    const erro = new Error('Nao foi possivel encontrar o titulo da conversa no Java.');
+    erro.status = 404;
+    throw erro;
+  }
+
+  const historico = [];
+  for (const mensagem of respostaConversa.corpo.dados) {
+    if (typeof mensagem?.texto !== 'string' || mensagem.texto.trim() === '') continue;
+    adicionarAoHistorico(
+      historico,
+      String(mensagem.remetente).toLowerCase() === 'usuario' ? 'usuario' : 'IA',
+      mensagem.texto,
+    );
+  }
+  const conversa = { titulo: item.titulo.trim(), historico };
+  conversasEmMemoria.set(chave, conversa);
+  return conversa;
+}
+
+async function persistirMensagens(dadosBase, mensagens) {
+  for (const mensagem of mensagens) {
+    await enviarMensagemParaIaController({ ...dadosBase, ...mensagem });
+  }
+}
+
+function mensagensDoUsuario(pergunta, respostasClarificacao) {
+  if (respostasClarificacao.length === 0) {
+    return [{ remetente: 'usuario', texto: pergunta }];
+  }
+  return respostasClarificacao.map(({ resposta }) => ({
+    remetente: 'usuario',
+    texto: resposta,
+  }));
+}
+
+function adicionarAoHistorico(historico, remetente, texto) {
+  const role = remetente === 'usuario' ? 'user' : 'model';
+  const ultimaMensagem = historico.at(-1);
+  if (ultimaMensagem?.role === role) {
+    ultimaMensagem.parts.push({ text: texto });
+    return;
+  }
+  historico.push({ role, parts: [{ text: texto }] });
+}
+
+function registrarNaMemoria(conversa, mensagens) {
+  for (const { remetente, texto } of mensagens) {
+    adicionarAoHistorico(conversa.historico, remetente, texto);
+  }
+}
 
 function montarPerguntaComContexto(pergunta, respostasClarificacao) {
   if (!Array.isArray(respostasClarificacao) || respostasClarificacao.length === 0) {
@@ -43,9 +117,15 @@ function lerRespostaEstruturada(texto) {
     throw new Error('O Gemini devolveu uma resposta vazia.');
   }
 
+  const textoLimpo = texto
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
+
   let dados;
   try {
-    dados = JSON.parse(texto);
+    dados = JSON.parse(textoLimpo);
   } catch {
     throw new Error('O Gemini devolveu um JSON invalido.');
   }
@@ -63,14 +143,23 @@ function lerRespostaEstruturada(texto) {
       throw new Error('O Gemini pediu esclarecimentos, mas nao enviou perguntas.');
     }
 
-    return { needsClarification: true, questions };
+    return {
+      needsClarification: true,
+      questions,
+      title: typeof dados.title === 'string' ? dados.title.trim() : '',
+    };
   }
 
   if (typeof dados.response !== 'string' || dados.response.trim() === '') {
     throw new Error('O Gemini nao enviou a resposta final esperada.');
   }
 
-  return { needsClarification: false, response: markdownParaHtml(dados.response) };
+  return {
+    needsClarification: false,
+    response: markdownParaHtml(dados.response),
+    responseForHistory: dados.response,
+    title: typeof dados.title === 'string' ? dados.title.trim() : '',
+  };
 }
 
 export async function pedirProGemini(
@@ -95,11 +184,20 @@ export async function pedirProGemini(
   const perguntaComContexto = montarPerguntaComContexto(pergunta, respostasClarificacao);
 
   let conversa_uuid = conversaUuidRecebido;
+  let resposta;
+  const primeiraMensagem = !conversa_uuid;
+  const conversa = primeiraMensagem
+    ? { titulo: '', historico: [] }
+    : await carregarConversa(usuario_id, areaNormalizada, conversa_uuid);
+  const historico = conversa.historico;
+  const contents = historico.length > 0
+    ? [...historico, { role: 'user', parts: [{ text: perguntaComContexto }] }]
+    : perguntaComContexto;
 
   if (!conversa_uuid) {
-    const resposta = await ai.models.generateContent({
+    resposta = await ai.models.generateContent({
       model: 'gemini-3.6-flash',
-      contents: perguntaComContexto,
+      contents,
       config: {
         systemInstruction: contextoDaArea,
         responseMimeType: 'application/json',
@@ -117,17 +215,18 @@ export async function pedirProGemini(
             },
             title: {
               type: 'string',
-              description: 'Titulo relacionado a pergunta do usuario, fazer pelo menos 4 a 6 palavras, resumindo o assunto da pergunta.'
+              maxLength: 80,
+              description: 'Titulo curto, com 4 a 6 palavras, que resuma o assunto da conversa.'
             },
             response: {
               type: 'string',
               description: 'A resposta final e completa para o usuário (preencher apenas se needsClarification for false).'
             }
           },
-          required: ['needsClarification']
+          required: ['needsClarification', 'title']
         },
         temperature: temperatura,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 4096,
         thinkingConfig: {
           thinkingLevel: 'low',
         },
@@ -136,9 +235,9 @@ export async function pedirProGemini(
 
     conversa_uuid = crypto.randomUUID();
   } else {
-    const resposta = await ai.models.generateContent({
+    resposta = await ai.models.generateContent({
       model: 'gemini-3.6-flash',
-      contents: perguntaComContexto,
+      contents,
       config: {
         systemInstruction: contextoDaArea,
         responseMimeType: 'application/json',
@@ -162,7 +261,7 @@ export async function pedirProGemini(
           required: ['needsClarification']
         },
         temperature: temperatura,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 4096,
         thinkingConfig: {
           thinkingLevel: 'low',
         },
@@ -171,8 +270,37 @@ export async function pedirProGemini(
   }
 
   const textoBruto = resposta.text ?? '';
+  const resultado = lerRespostaEstruturada(textoBruto);
+  const titulo = primeiraMensagem ? resultado.title : conversa.titulo;
+
+  if (typeof titulo !== 'string' || titulo.trim() === '') {
+    throw new Error('O Gemini nao gerou o titulo da primeira mensagem.');
+  }
+
+  conversa.titulo = titulo.trim();
+  const dadosBase = {
+    usuario_id: String(usuario_id),
+    assistente_tipo: areaNormalizada,
+    conversa_uuid,
+    titulo: conversa.titulo,
+  };
+  const mensagensUsuario = mensagensDoUsuario(pergunta, respostasClarificacao);
+  const mensagensIa = resultado.needsClarification
+    ? resultado.questions.map((question) => ({ remetente: 'IA', texto: question }))
+    : [{ remetente: 'IA', texto: resultado.responseForHistory }];
+  const mensagens = [...mensagensUsuario, ...mensagensIa];
+
+  await persistirMensagens(dadosBase, mensagens);
+  registrarNaMemoria(conversa, mensagens);
+  conversasEmMemoria.set(
+    chaveDaConversa(usuario_id, areaNormalizada, conversa_uuid),
+    conversa,
+  );
+
+  delete resultado.responseForHistory;
+  delete resultado.title;
   return {
-    ...lerRespostaEstruturada(textoBruto),
+    ...resultado,
     conversa_uuid,
   };
 }

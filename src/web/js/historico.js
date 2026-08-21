@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function lerResposta(response) {
     const data = await response.json().catch(() => ({}));
     if (response.status === 401) mostrarSessaoExpirada();
+    if (response.status === 404) return [];
     if (!response.ok || data.sucesso !== true) throw new Error(data.mensagem || 'Não foi possível carregar o histórico.');
     return Array.isArray(data.dados) ? data.dados : [];
   }
@@ -58,7 +59,34 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.history-card.is-menu-open').forEach((card) => {
       card.classList.remove('is-menu-open');
       card.querySelector('.history-options-button')?.setAttribute('aria-expanded', 'false');
+      if (card._optionsMenu && card._actionsContainer) {
+        card._optionsMenu.classList.remove('is-open');
+        card._optionsMenu.removeAttribute('style');
+        card._actionsContainer.appendChild(card._optionsMenu);
+      }
     });
+  }
+  function abrirMenuForaDoCartao(card, menu) {
+    document.body.appendChild(menu);
+    menu.classList.add('is-open');
+    menu.style.visibility = 'hidden';
+
+    const cardRect = card.getBoundingClientRect();
+    const margem = 10;
+    const largura = menu.offsetWidth;
+    const altura = menu.offsetHeight;
+    let esquerda = cardRect.right + margem;
+    if (esquerda + largura > window.innerWidth - margem) {
+      esquerda = Math.max(margem, cardRect.left - largura - margem);
+    }
+    const topo = Math.min(
+      Math.max(margem, cardRect.top),
+      Math.max(margem, window.innerHeight - altura - margem),
+    );
+
+    menu.style.left = `${esquerda}px`;
+    menu.style.top = `${topo}px`;
+    menu.style.visibility = 'visible';
   }
   function confirmarAcao({ perigo, titulo, texto, detalhe = '', aoConfirmar }) {
     document.querySelector('.conversation-confirm-backdrop')?.remove();
@@ -143,6 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
     acoes.innerHTML = `<button type="button" class="history-options-button" aria-expanded="false"><span></span><span></span><span></span></button>
       <div class="history-options-menu"><button type="button" data-action="rename">Mudar título</button><button type="button" data-action="delete">Deletar</button></div>`;
     const botaoOpcoes = acoes.querySelector('.history-options-button');
+    const menuOpcoes = acoes.querySelector('.history-options-menu');
+    card._optionsMenu = menuOpcoes;
+    card._actionsContainer = acoes;
     botaoOpcoes.setAttribute('aria-label', `Opções de ${item.titulo}`);
     linha.append(titulo, acoes);
     const area = document.createElement('span');
@@ -160,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fecharMenus();
       card.classList.toggle('is-menu-open', abrir);
       botaoOpcoes.setAttribute('aria-expanded', String(abrir));
+      if (abrir) abrirMenuForaDoCartao(card, menuOpcoes);
     });
     acoes.querySelector('[data-action="rename"]').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -222,7 +254,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function renderizarTitulos(itens) {
     historyList.replaceChildren();
-    if (!itens.length) return void (historyList.innerHTML = '<div class="history-empty">Nenhuma conversa encontrada.</div>');
+    if (!itens.length) {
+      const vazio = document.createElement('div');
+      vazio.className = 'history-empty history-empty-state';
+      const mensagem = document.createElement('p');
+      mensagem.textContent = 'Você ainda não possui conversas. Crie uma nova para começar.';
+      const criar = document.createElement('button');
+      criar.type = 'button';
+      criar.className = 'history-empty-action';
+      criar.textContent = 'Criar nova conversa';
+      criar.addEventListener('click', () => { window.location.href = window.location.pathname; });
+      vazio.append(mensagem, criar);
+      historyList.appendChild(vazio);
+      return;
+    }
     itens.forEach((item) => { if (item?.conversa_uuid && item?.titulo && assistentes[item.assistente_tipo]) historyList.appendChild(criarCard(item)); });
     const ativo = itens.find((item) => item.conversa_uuid === conversaAtiva);
     if (ativo && ativo.assistente_tipo === areaAtual) carregarConversa(ativo).catch((erro) => mostrarErroConversa(erro.message));
@@ -236,5 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   newChatButton?.addEventListener('click', () => { window.location.href = window.location.pathname; });
   document.addEventListener('click', (e) => { if (!e.target.closest('.history-actions')) fecharMenus(); });
+  window.addEventListener('resize', fecharMenus);
+  historyList.addEventListener('scroll', fecharMenus);
   carregarTitulos();
 });

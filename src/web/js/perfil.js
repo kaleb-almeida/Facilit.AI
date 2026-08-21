@@ -54,7 +54,7 @@ document.getElementById('confirmDeleteActionBtn').addEventListener('click', asyn
     confirmBtn.textContent = 'Excluindo...';
 
     try {
-        const response = await fetch('http://localhost:8081/api/auth/delete', {
+        const response = await fetch('http://localhost:8080/facilitai/api/auth/delete', {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${authToken}` }
         });

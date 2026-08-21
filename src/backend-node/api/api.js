@@ -1,6 +1,6 @@
 import http from 'node:http';
 
-const IA_CONTROLLER_URL = 'http://localhost:8080/iaController';
+const IA_CONTROLLER_URL = 'http://localhost:8080/facilitai/iaController';
 
 function validarObjeto(dados) {
   if (!dados || typeof dados !== 'object' || Array.isArray(dados)) {
